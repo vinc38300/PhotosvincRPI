@@ -1,0 +1,26 @@
+INFO:plugin_manager:Plugin camera enregistré
+INFO:plugin_manager:Plugin printer enregistré
+INFO:camera_printer_real:Vrais plugins Camera et Printer enregistrés
+INFO:plugin_manager:Plugin decorator enregistré
+INFO:decorator_real:Vrai plugin Decorator enregistré
+INFO:plugin_manager:Plugin qrcode enregistré
+INFO:qr_code_plugin:QR Code plugin enregistré
+INFO:nextcloud_plugin:NextCloud plugin enregistré
+INFO:plugin_manager:Plugin wifi enregistré
+INFO:plugin_manager:Plugin keyboard enregistré
+INFO:plugin_manager:Initialisation de camera...
+INFO:camera_printer_real:Initialisation CameraPlugin
+INFO:camera_printer_real:Caméra détectée et prête
+INFO:plugin_manager:Initialisation de printer...
+INFO:camera_printer_real:Initialisation PrinterPlugin: CP_400
+INFO:camera_printer_real:Imprimante CP_400 détectée
+INFO:plugin_manager:Initialisation de decorator...
+INFO:decorator_real:Initialisation DecoratorPlugin
+INFO:plugin_manager:Initialisation de wifi...
+INFO:plugin_manager:Initialisation du plugin WiFi: wifi
+INFO:plugin_manager:Initialisation de keyboard...
+INFO:plugin_manager:Initialisation du plugin clavier: keyboard
+INFO:plugin_manager:Initialisation de qrcode...
+INFO:qr_code_plugin:Initialisation QRCodePlugin
+INFO:qr_code_plugin:Module qrcode disponible
+INFO:photo_web_server:Serveur web démarré sur http://192.168.1.38:8000

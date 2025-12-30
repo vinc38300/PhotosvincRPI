@@ -1,0 +1,571 @@
+#!/usr/bin/env python3
+"""
+Système de détection d'imprimantes automatique pour photovinc
+✅ CORRECTION: Vérifie la connexion physique réelle (USB/réseau)
+✅ SUPPORT IPP: Utilise epson_ipp_printer pour imprimantes réseau
+"""
+
+import subprocess
+import logging
+import os
+from typing import Dict, List, Any, Optional, Tuple
+from pathlib import Path
+import json
+from dataclasses import dataclass, asdict
+
+# ✅ NOUVEAU: Import IPP printer
+try:
+    from epson_ipp_printer import EpsonIPPPrinter
+    IPP_AVAILABLE = True
+except ImportError:
+    IPP_AVAILABLE = False
+    print("⚠️  epson_ipp_printer non disponible (pip install reportlab)")
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class PrinterInfo:
+    """Information sur une imprimante détectée"""
+    name: str
+    model: str
+    status: str
+    device_uri: str
+    is_default: bool = False
+    is_available: bool = True
+    is_physically_connected: bool = False
+    location: str = ""
+    paper_size: str = "Postcard"
+    
+    # ✅ NOUVEAU: Instance IPP si imprimante réseau
+    ipp_printer: Optional[Any] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        data = asdict(self)
+        # Ne pas sérialiser ipp_printer
+        data.pop('ipp_printer', None)
+        return data
+
+
+class PrinterDetector:
+    """Détecte et analyse les imprimantes disponibles"""
+    
+    def __init__(self):
+        self.printers: Dict[str, PrinterInfo] = {}
+        self.cache_file = Path.home() / ".photovinc_printers_cache.json"
+        self.lpstat_path = "/usr/bin/lpstat"
+        self.cups_available = self._check_cups()
+    
+    def _check_cups(self) -> bool:
+        """Vérifie si CUPS est disponible"""
+        try:
+            result = subprocess.run(
+                [self.lpstat_path, "-r"],
+                capture_output=True,
+                timeout=2
+            )
+            return result.returncode == 0
+        except Exception as e:
+            logger.error(f"CUPS non disponible: {e}")
+            return False
+    
+    def detect_printers(self) -> Dict[str, PrinterInfo]:
+        """Détecte toutes les imprimantes disponibles"""
+        self.printers.clear()
+        
+        if not self.cups_available:
+            logger.warning("CUPS indisponible")
+            return {}
+        
+        try:
+            result = subprocess.run(
+                [self.lpstat_path, "-p", "-d"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            
+            if result.returncode != 0:
+                logger.warning("lpstat erreur")
+                return {}
+            
+            lines = result.stdout.strip().split('\n')
+            default_printer = None
+            
+            for line in lines:
+                if 'system default' in line.lower():
+                    parts = line.split(':')
+                    if len(parts) >= 2:
+                        default_printer = parts[-1].strip()
+                
+                elif line.startswith('printer'):
+                    parts = line.split()
+                    if len(parts) >= 4:
+                        name = parts[1]
+                        status = ' '.join(parts[3:])
+                        device_uri = self._get_printer_uri(name)
+                        model = self._detect_model(name)
+                        
+                        # ✅ NOUVEAU: Vérifier connexion physique
+                        is_physically_connected = self._check_physical_connection(name, device_uri)
+                        
+                                                # ✅ NOUVEAU: Créer instance IPP si réseau
+                        ipp_printer_instance = None
+                        if IPP_AVAILABLE and ('ipp://' in device_uri.lower() or 'ipps://' in device_uri.lower()):
+                            try:
+                                ipp_printer_instance = EpsonIPPPrinter(device_uri, name)
+                                print(f"    ✓ IPP printer créé pour {name}")
+                            except Exception as e:
+                                print(f"    ✗ Erreur IPP: {e}")
+                        
+                        info = PrinterInfo(
+                            name=name,
+                            model=model,
+                            status=status,
+                            device_uri=device_uri,
+                            is_default=(name == default_printer),
+                            is_available='idle' in status.lower(),
+                            is_physically_connected=is_physically_connected,
+                            ipp_printer=ipp_printer_instance
+                        )
+                        self.printers[name] = info
+                        
+                        # ✅ Debug: Afficher connexion
+                        conn_status = "🟢 CONNECTÉE" if is_physically_connected else "🔴 DÉCONNECTÉE"
+                        print(f"  {name}: {conn_status}")
+            
+            return self.printers
+            
+        except Exception as e:
+            logger.error(f"Erreur détection: {e}")
+            return {}
+    
+    def _check_physical_connection(self, printer_name: str, device_uri: str) -> bool:
+        """
+        ✅ NOUVEAU: Vérifie si l'imprimante est physiquement connectée
+        
+        Critères:
+        - USB: Vérifie avec lpstat -v et lsusb
+        - Réseau: Vérifie avec ping ou curl
+        - ImplicitClass: Vérifie les membres de la classe
+        """
+        
+        # 1. Vérifier l'état CUPS
+        try:
+            result = subprocess.run(
+                ['lpstat', '-p', printer_name],
+                capture_output=True,
+                text=True,
+                timeout=2
+            )
+            
+            # Si disabled ou unavailable, c'est déconnecté
+            if 'disabled' in result.stdout.lower():
+                return False
+                
+        except:
+            pass
+        
+        # 2. Vérifier selon le type d'URI
+        uri_lower = device_uri.lower()
+        
+        # USB: gutenprint53+usb://
+        if 'usb://' in uri_lower:
+            return self._check_usb_connection(printer_name)
+        
+        # Réseau DNS-SD: dnssd://
+        elif 'dnssd://' in uri_lower:
+            return self._check_network_connection(device_uri)
+        
+        # ImplicitClass: plusieurs imprimantes
+        elif 'implicitclass://' in uri_lower:
+            return self._check_implicit_class(printer_name)
+        
+        # Socket réseau: socket://
+        elif 'socket://' in uri_lower or 'ipp://' in uri_lower:
+            return self._check_network_connection(device_uri)
+        
+        # Par défaut, supposer connectée si idle
+        return 'idle' in device_uri.lower()
+    
+    def _check_usb_connection(self, printer_name: str) -> bool:
+        """Vérifie connexion USB avec lsusb - RIGOUREUX"""
+        try:
+            # Méthode 1: lpstat -v pour vérifier l'URI
+            result = subprocess.run(
+                ['lpstat', '-v', printer_name],
+                capture_output=True,
+                text=True,
+                timeout=2
+            )
+            
+            # Si l'URI contient "usb://", vérifier lsusb
+            if 'usb://' in result.stdout.lower():
+                # Méthode 2: lsusb pour voir les périphériques USB RÉELS
+                lsusb_result = subprocess.run(
+                    ['lsusb'],
+                    capture_output=True,
+                    text=True,
+                    timeout=2
+                )
+                
+                if lsusb_result.returncode != 0:
+                    return False
+                
+                lsusb_lower = lsusb_result.stdout.lower()
+                
+                # Chercher EXPLICITEMENT Canon ou Epson
+                if 'canon' in printer_name.lower():
+                    is_connected = 'canon' in lsusb_lower
+                    print(f"    USB Canon: {'✓ trouvé' if is_connected else '✗ absent'}")
+                    return is_connected
+                    
+                elif 'epson' in printer_name.lower():
+                    is_connected = 'epson' in lsusb_lower or 'seiko' in lsusb_lower
+                    print(f"    USB Epson: {'✓ trouvé' if is_connected else '✗ absent'}")
+                    return is_connected
+                
+                # Nom non reconnu : chercher n'importe quelle imprimante
+                has_printer = any(keyword in lsusb_lower for keyword in ['printer', 'canon', 'epson', 'hp', 'brother'])
+                print(f"    USB générique: {'✓ imprimante trouvée' if has_printer else '✗ aucune imprimante'}")
+                return has_printer
+            
+            return False
+            
+        except Exception as e:
+            print(f"  Erreur check USB {printer_name}: {e}")
+            return False
+    
+    def _check_network_connection(self, device_uri: str) -> bool:
+        """Vérifie connexion réseau"""
+        try:
+            # Extraire l'hôte de l'URI
+            if '://' in device_uri:
+                # Ex: dnssd://CP400%20%40%20hostname/...
+                parts = device_uri.split('://')[1].split('/')[0]
+                host = parts.split('%20')[0]  # Enlever les espaces encodés
+                
+                # Tenter un ping rapide (1 seul paquet, timeout 1s)
+                result = subprocess.run(
+                    ['ping', '-c', '1', '-W', '1', host],
+                    capture_output=True,
+                    timeout=2
+                )
+                
+                return result.returncode == 0
+            
+            return False
+            
+        except Exception as e:
+            print(f"  Erreur check réseau: {e}")
+            return False
+    
+    def _check_implicit_class(self, printer_name: str) -> bool:
+        """
+        Vérifie les imprimantes membres d'une classe implicite
+        Une classe est connectée si AU MOINS UN membre est connecté
+        """
+        try:
+            result = subprocess.run(
+                ['lpstat', '-c', printer_name],
+                capture_output=True,
+                text=True,
+                timeout=2
+            )
+            
+            # Récupérer les membres de la classe
+            if 'members of class' in result.stdout.lower():
+                members = result.stdout.split(':')[1].strip().split(',')
+                
+                # Vérifier chaque membre
+                for member in members:
+                    member = member.strip()
+                    member_uri = self._get_printer_uri(member)
+                    
+                    if self._check_physical_connection(member, member_uri):
+                        return True
+                
+                return False
+            
+            # Si pas de classe trouvée, vérifier directement
+            return True
+            
+        except Exception as e:
+            print(f"  Erreur check classe {printer_name}: {e}")
+            return True
+    
+    def _get_printer_uri(self, printer_name: str) -> str:
+        """Obtient l'URI de l'imprimante"""
+        try:
+            result = subprocess.run(
+                [self.lpstat_path, "-v", printer_name],
+                capture_output=True,
+                text=True,
+                timeout=3
+            )
+            
+            if result.returncode == 0:
+                for line in result.stdout.split('\n'):
+                    if ':' in line:
+                        parts = line.split(':')
+                        if len(parts) >= 2:
+                            return ':'.join(parts[1:]).strip()
+            
+            return "unknown"
+        except:
+            return "unknown"
+    
+    def _detect_model(self, printer_name: str) -> str:
+        """Détecte le modèle"""
+        name_upper = printer_name.upper()
+        
+        if 'CP' in name_upper and '400' in name_upper:
+            return 'Canon CP-400'
+        elif 'SELPHY' in name_upper:
+            return 'Canon SELPHY'
+        elif 'EPSON' in name_upper:
+            if 'R360' in name_upper:
+                return 'Epson R360'
+            return 'Epson Stylus'
+        elif 'HP' in name_upper:
+            return 'HP'
+        
+        return f"Imprimante ({printer_name})"
+    
+    def get_best_printer(self) -> Optional[PrinterInfo]:
+        """
+        ✅ CORRECTION: Retourne la meilleure imprimante CONNECTÉE
+        
+        Priorité:
+        1. Imprimante par défaut ET physiquement connectée
+        2. Première imprimante physiquement connectée et disponible
+        3. Première imprimante disponible (même déconnectée)
+        4. N'importe quelle imprimante
+        """
+        if not self.printers:
+            return None
+        
+        print("\n🔍 Sélection de la meilleure imprimante:")
+        
+        # 1. Chercher imprimante par défaut connectée
+        for info in self.printers.values():
+            if info.is_default and info.is_physically_connected and info.is_available:
+                print(f"  ✓ Sélectionnée (défaut + connectée): {info.name} ({info.model})")
+                return info
+        
+        # 2. Chercher première imprimante connectée et disponible
+        for info in self.printers.values():
+            if info.is_physically_connected and info.is_available:
+                print(f"  ✓ Sélectionnée (connectée + dispo): {info.name} ({info.model})")
+                return info
+        
+        # 3. Chercher première imprimante disponible
+        for info in self.printers.values():
+            if info.is_available:
+                print(f"  ⚠ Sélectionnée (dispo mais déconnectée): {info.name} ({info.model})")
+                return info
+        
+        # 4. Prendre n'importe laquelle
+        first = list(self.printers.values())[0]
+        print(f"  ⚠ Sélectionnée (par défaut): {first.name} ({first.model})")
+        return first
+    
+    def cache_printers(self):
+        """Sauvegarde le cache"""
+        try:
+            data = {name: info.to_dict() for name, info in self.printers.items()}
+            with open(self.cache_file, 'w') as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            logger.error(f"Erreur cache: {e}")
+    
+    def load_cached_printers(self) -> Dict[str, PrinterInfo]:
+        """Charge le cache"""
+        try:
+            if self.cache_file.exists():
+                with open(self.cache_file, 'r') as f:
+                    data = json.load(f)
+                    self.printers = {
+                        name: PrinterInfo(**info) 
+                        for name, info in data.items()
+                    }
+                return self.printers
+        except:
+            pass
+        return {}
+
+
+class PrinterCompatibilityManager:
+    """Gère la compatibilité"""
+    
+    PRINTER_PROFILES = {
+        'Canon CP-400': {
+            'paper_size': 'Postcard',
+            'dpi': 300,
+            'max_width': 101,
+            'max_height': 152,
+            'color_mode': 'Color'
+        },
+        'Canon SELPHY': {
+            'paper_size': 'Postcard',
+            'dpi': 300,
+            'max_width': 101,
+            'max_height': 152,
+            'color_mode': 'Color'
+        },
+        'Epson Stylus': {
+            'paper_size': 'Postcard',  # ✅ Modifié pour R360
+            'dpi': 360,
+            'max_width': 101,
+            'max_height': 152,
+            'color_mode': 'Color'
+        },
+        'Epson R360': {
+            'paper_size': 'Postcard',
+            'dpi': 360,
+            'max_width': 101,
+            'max_height': 152,
+            'color_mode': 'Color'
+        },
+        'HP': {
+            'paper_size': 'A4',
+            'dpi': 300,
+            'max_width': 210,
+            'max_height': 297,
+            'color_mode': 'Color'
+        }
+    }
+    
+    @staticmethod
+    def get_profile(model: str) -> Dict[str, Any]:
+        """Obtient le profil"""
+        for key, profile in PrinterCompatibilityManager.PRINTER_PROFILES.items():
+            if key.lower() in model.lower():
+                return profile
+        
+        # Profil par défaut pour photos
+        return {
+            'paper_size': 'Postcard',
+            'dpi': 300,
+            'max_width': 101,
+            'max_height': 152,
+            'color_mode': 'Color'
+        }
+
+
+class PrinterIntegration:
+    """Intègre les imprimantes"""
+    
+    def __init__(self, plugin_manager):
+        self.manager = plugin_manager
+        self.detector = PrinterDetector()
+        self.compatibility = PrinterCompatibilityManager()
+        self.selected_printer: Optional[PrinterInfo] = None
+    
+    def initialize(self) -> Tuple[bool, str]:
+        """Initialise"""
+        print("\n🖨️  Détection des imprimantes...")
+        printers = self.detector.detect_printers()
+        
+        if not printers:
+            printers = self.detector.load_cached_printers()
+            if not printers:
+                return False, "Aucune imprimante"
+        
+        self.detector.cache_printers()
+        self.selected_printer = self.detector.get_best_printer()
+        
+        if not self.selected_printer:
+            return False, "Aucune imprimante sélectionnée"
+        
+        self._configure_printer_plugin()
+        
+        status = "connectée" if self.selected_printer.is_physically_connected else "déconnectée"
+        return True, f"Imprimante: {self.selected_printer.name} ({status})"
+    
+    def _configure_printer_plugin(self):
+        """Configure le plugin"""
+        if not self.selected_printer:
+            return
+        
+        profile = self.compatibility.get_profile(self.selected_printer.model)
+        printer_config = self.manager.plugin_configs.get('printer')
+        
+        if printer_config:
+            printer_config.settings.update({
+                'printer_name': self.selected_printer.name,
+                'printer_model': self.selected_printer.model,
+                'device_uri': self.selected_printer.device_uri,
+                'paper_size': profile.get('paper_size', 'Postcard'),
+                'dpi': profile.get('dpi', 300),
+                'is_physically_connected': self.selected_printer.is_physically_connected
+            })
+            self.manager.save_config()
+            
+            print(f"\n⚙️  Configuration imprimante:")
+            print(f"  Nom: {self.selected_printer.name}")
+            print(f"  Modèle: {self.selected_printer.model}")
+            print(f"  Papier: {profile['paper_size']} ({profile['dpi']} DPI)")
+            print(f"  Connexion: {'🟢 Physique' if self.selected_printer.is_physically_connected else '🔴 Non connectée'}")
+    
+    def get_printer_info(self) -> Dict[str, Any]:
+        """Info imprimante"""
+        if not self.selected_printer:
+            return {}
+        
+        return {
+            'name': self.selected_printer.name,
+            'model': self.selected_printer.model,
+            'status': self.selected_printer.status,
+            'device_uri': self.selected_printer.device_uri,
+            'is_physically_connected': self.selected_printer.is_physically_connected,
+            'profile': self.compatibility.get_profile(self.selected_printer.model)
+        }
+    
+    def get_all_printers(self) -> List[Dict[str, Any]]:
+        """Liste toutes"""
+        return [info.to_dict() for info in self.detector.printers.values()]
+
+
+def setup_printer_detection(plugin_manager) -> Tuple[bool, str]:
+    """Setup pour integration_complete.py"""
+    integration = PrinterIntegration(plugin_manager)
+    return integration.initialize()
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    
+    print("\n" + "="*70)
+    print("  DÉTECTION IMPRIMANTES - AVEC VÉRIFICATION CONNEXION PHYSIQUE")
+    print("="*70)
+    
+    detector = PrinterDetector()
+    printers = detector.detect_printers()
+    
+    print("\n=== Imprimantes détectées ===")
+    if printers:
+        for name, info in printers.items():
+            conn = "🟢 CONNECTÉE" if info.is_physically_connected else "🔴 DÉCONNECTÉE"
+            default = " [DÉFAUT]" if info.is_default else ""
+            print(f"\n{info.model} ({name}){default}")
+            print(f"  Status: {info.status}")
+            print(f"  URI: {info.device_uri}")
+            print(f"  Connexion physique: {conn}")
+    else:
+        print("✗ Aucune imprimante détectée")
+    
+    # Tester la sélection
+    best = detector.get_best_printer()
+    if best:
+        print(f"\n{'='*70}")
+        print(f"✓ IMPRIMANTE SÉLECTIONNÉE: {best.model} ({best.name})")
+        print(f"  Connectée: {'Oui' if best.is_physically_connected else 'Non'}")
+        print(f"{'='*70}\n")
+    
+    print("\n=== Profils Compatibilité ===")
+    for model in ['Canon CP-400', 'Epson R360', 'HP']:
+        profile = PrinterCompatibilityManager.get_profile(model)
+        print(f"{model}: {profile['paper_size']} @ {profile['dpi']} DPI")
+    
+    print()

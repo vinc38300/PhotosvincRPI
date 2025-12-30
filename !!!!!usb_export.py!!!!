@@ -1,0 +1,299 @@
+#!/usr/bin/env python3
+"""
+Module d'export USB pour photovinc
+Détecte les clés USB et copie les photos
+"""
+
+import subprocess
+import shutil
+from pathlib import Path
+from datetime import datetime
+import time
+import os
+
+
+class USBExporter:
+    """Gère l'export des photos vers clé USB"""
+    
+    def __init__(self, photo_dir):
+        self.photo_dir = Path(photo_dir)
+        self.mount_base = Path("/media") / os.getenv("USER", "vincent")
+    
+    def detect_usb_drives(self):
+        """
+        Détecte toutes les clés USB montées
+        
+        Returns:
+            list: Liste de dictionnaires avec infos des clés USB
+        """
+        usb_drives = []
+        
+        # Méthode 1: Vérifier /media/USER/
+        if self.mount_base.exists():
+            for mount_point in self.mount_base.iterdir():
+                if mount_point.is_dir():
+                    # Vérifier si c'est bien un point de montage
+                    if self._is_mounted(mount_point):
+                        info = self._get_drive_info(mount_point)
+                        usb_drives.append(info)
+        
+        # Méthode 2: Parser /proc/mounts pour trouver les montages USB
+        try:
+            with open('/proc/mounts', 'r') as f:
+                for line in f:
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        device = parts[0]
+                        mount_point = Path(parts[1])
+                        
+                        # Vérifier si c'est un périphérique USB (sdb, sdc, etc.)
+                        if '/dev/sd' in device and device[-1] >= 'b':
+                            if mount_point not in [d['path'] for d in usb_drives]:
+                                if mount_point.exists() and mount_point.is_dir():
+                                    info = self._get_drive_info(mount_point)
+                                    usb_drives.append(info)
+        except:
+            pass
+        
+        return usb_drives
+    
+    def _is_mounted(self, path):
+        """Vérifie si un chemin est un point de montage"""
+        try:
+            result = subprocess.run(
+                ['mountpoint', '-q', str(path)],
+                capture_output=True,
+                timeout=2
+            )
+            return result.returncode == 0
+        except:
+            # Fallback: vérifier si le dossier n'est pas vide
+            try:
+                return any(path.iterdir())
+            except:
+                return False
+    
+    def _get_drive_info(self, mount_point):
+        """Récupère les infos d'un périphérique"""
+        try:
+            stat = shutil.disk_usage(str(mount_point))
+            
+            return {
+                'path': mount_point,
+                'name': mount_point.name,
+                'total': stat.total,
+                'used': stat.used,
+                'free': stat.free,
+                'total_gb': round(stat.total / (1024**3), 2),
+                'free_gb': round(stat.free / (1024**3), 2),
+                'percent_used': round((stat.used / stat.total) * 100, 1)
+            }
+        except Exception as e:
+            return {
+                'path': mount_point,
+                'name': mount_point.name,
+                'total': 0,
+                'free': 0,
+                'total_gb': 0,
+                'free_gb': 0,
+                'percent_used': 0,
+                'error': str(e)
+            }
+    
+    def calculate_export_size(self):
+        """Calcule la taille totale des photos à exporter"""
+        photos = list(self.photo_dir.glob("*.jpg"))
+        total_size = sum(p.stat().st_size for p in photos)
+        
+        return {
+            'count': len(photos),
+            'size_bytes': total_size,
+            'size_mb': round(total_size / (1024**2), 2),
+            'size_gb': round(total_size / (1024**3), 2)
+        }
+    
+    def export_to_usb(self, usb_drive, progress_callback=None):
+        """
+        Exporte les photos vers une clé USB
+        
+        Args:
+            usb_drive: Dictionnaire avec les infos du périphérique
+            progress_callback: Fonction appelée pour chaque fichier (fichier, index, total)
+        
+        Returns:
+            tuple: (succès, message, nombre de fichiers copiés)
+        """
+        usb_path = usb_drive['path']
+        
+        # Créer le dossier de destination
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        dest_folder = usb_path / f"photovinc_{timestamp}"
+        
+        try:
+            dest_folder.mkdir(exist_ok=True)
+        except Exception as e:
+            return False, f"Impossible de créer le dossier: {e}", 0
+        
+        # Récupérer toutes les photos
+        photos = sorted(self.photo_dir.glob("*.jpg"))
+        
+        if not photos:
+            return False, "Aucune photo à exporter", 0
+        
+        # Vérifier l'espace disponible
+        export_size = self.calculate_export_size()
+        if export_size['size_bytes'] > usb_drive['free']:
+            return False, f"Espace insuffisant (besoin: {export_size['size_mb']} MB, dispo: {usb_drive['free_gb']} GB)", 0
+        
+        # Copier les photos
+        copied = 0
+        failed = []
+        
+        for idx, photo in enumerate(photos, 1):
+            try:
+                dest_file = dest_folder / photo.name
+                shutil.copy2(photo, dest_file)
+                copied += 1
+                
+                if progress_callback:
+                    progress_callback(photo.name, idx, len(photos))
+                
+            except Exception as e:
+                failed.append((photo.name, str(e)))
+        
+        # Créer un fichier readme
+        try:
+            readme = dest_folder / "README.txt"
+            readme.write_text(
+                f"Photos photovinc\n"
+                f"================\n\n"
+                f"Date d'export: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                f"Nombre de photos: {copied}\n"
+                f"Taille totale: {export_size['size_mb']} MB\n\n"
+                f"Ces photos ont été exportées depuis le photomaton photovinc.\n"
+            )
+        except:
+            pass
+        
+        # Message de résultat
+        if copied == len(photos):
+            return True, f"✅ {copied} photos exportées avec succès", copied
+        elif copied > 0:
+            return True, f"⚠️ {copied}/{len(photos)} photos exportées\n{len(failed)} échecs", copied
+        else:
+            return False, "❌ Aucune photo n'a pu être exportée", 0
+    
+    def safe_eject(self, usb_drive):
+        """Éjecte proprement la clé USB"""
+        try:
+            # Méthode 1: udisksctl (Ubuntu/Debian)
+            result = subprocess.run(
+                ['udisksctl', 'unmount', '-b', str(usb_drive['path'])],
+                capture_output=True,
+                timeout=5
+            )
+            
+            if result.returncode == 0:
+                time.sleep(1)
+                subprocess.run(
+                    ['udisksctl', 'power-off', '-b', str(usb_drive['path'])],
+                    capture_output=True,
+                    timeout=5
+                )
+                return True, "Clé USB éjectée en toute sécurité"
+            
+            # Méthode 2: umount classique
+            result = subprocess.run(
+                ['umount', str(usb_drive['path'])],
+                capture_output=True,
+                timeout=5
+            )
+            
+            if result.returncode == 0:
+                return True, "Clé USB démontée"
+            
+            return False, "Impossible d'éjecter la clé USB"
+            
+        except Exception as e:
+            return False, f"Erreur lors de l'éjection: {e}"
+
+
+# Test standalone
+if __name__ == "__main__":
+    print("\n" + "="*70)
+    print("  TEST MODULE EXPORT USB")
+    print("="*70 + "\n")
+    
+    photo_dir = Path.home() / "Photos_photovinc"
+    exporter = USBExporter(photo_dir)
+    
+    # Détecter les clés USB
+    print("🔍 Détection des clés USB...")
+    usb_drives = exporter.detect_usb_drives()
+    
+    if not usb_drives:
+        print("❌ Aucune clé USB détectée")
+        print("\n💡 Insérez une clé USB et réessayez")
+        exit(0)
+    
+    print(f"✅ {len(usb_drives)} clé(s) USB détectée(s):\n")
+    
+    for i, drive in enumerate(usb_drives, 1):
+        print(f"{i}. {drive['name']}")
+        print(f"   Chemin: {drive['path']}")
+        print(f"   Capacité: {drive['total_gb']} GB")
+        print(f"   Libre: {drive['free_gb']} GB ({100-drive['percent_used']:.1f}%)")
+        print()
+    
+    # Calculer la taille de l'export
+    export_size = exporter.calculate_export_size()
+    print(f"📊 Taille de l'export:")
+    print(f"   Photos: {export_size['count']}")
+    print(f"   Taille: {export_size['size_mb']} MB")
+    print()
+    
+    if export_size['count'] == 0:
+        print("⚠️  Aucune photo à exporter")
+        exit(0)
+    
+    # Demander confirmation
+    choice = input("Voulez-vous exporter vers la clé USB ? (o/N): ")
+    if choice.lower() != 'o':
+        print("Annulé")
+        exit(0)
+    
+    # Sélectionner la clé
+    if len(usb_drives) > 1:
+        try:
+            idx = int(input(f"Choisissez la clé USB (1-{len(usb_drives)}): ")) - 1
+            if idx < 0 or idx >= len(usb_drives):
+                print("Choix invalide")
+                exit(1)
+            selected_drive = usb_drives[idx]
+        except:
+            print("Choix invalide")
+            exit(1)
+    else:
+        selected_drive = usb_drives[0]
+    
+    # Exporter
+    print(f"\n📦 Export vers: {selected_drive['name']}...")
+    
+    def progress(filename, idx, total):
+        print(f"   [{idx}/{total}] {filename}")
+    
+    success, message, count = exporter.export_to_usb(selected_drive, progress)
+    
+    print(f"\n{message}")
+    
+    if success:
+        print(f"\n💾 Dossier créé sur la clé USB")
+        print(f"   Cherchez: photovinc_YYYYMMDD_HHMMSS/")
+        
+        # Proposer éjection
+        eject = input("\nÉjecter la clé USB ? (o/N): ")
+        if eject.lower() == 'o':
+            eject_success, eject_msg = exporter.safe_eject(selected_drive)
+            print(eject_msg)
+    
+    print("\n" + "="*70 + "\n")
