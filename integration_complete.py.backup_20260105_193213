@@ -508,7 +508,7 @@ class photovincAppComplete:
     
     def show_gallery(self):
         """Affiche la galerie de photos"""
-        photos = sorted(self.photo_dir.glob("*.jpg"), reverse=True)
+        photos = sorted(self.photo_dir.glob("*.jpg"), reverse=True)[:20]
         
         if not photos:
             messagebox.showinfo("Galerie", "Aucune photo dans la galerie")
@@ -786,7 +786,8 @@ class photovincAppComplete:
         
         create_btn.config(command=create_montage)
     
-    def show_photo_actions(self, photo_path, parent_win):
+        def show_photo_actions(self, photo_path, parent_win):
+            pass
         """Affiche les actions possibles pour une photo"""
         actions_win = tk.Toplevel(parent_win)
         actions_win.title("Actions")
