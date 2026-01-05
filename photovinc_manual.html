@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manuel Photovinc - Version 5.1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-left: 5px solid #3498db;
+            padding-left: 15px;
+        }
+
+        h3 {
+            color: #555;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .box {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 5px solid;
+        }
+
+        .info {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .warning {
+            background: #fff3e0;
+            border-color: #ff9800;
+        }
+
+        .success {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .feature {
+            background: #f3e5f5;
+            border-color: #9c27b0;
+        }
+
+        .new {
+            background: #fff9c4;
+            border-color: #fbc02d;
+        }
+
+        strong {
+            color: #2c3e50;
+        }
+
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #e74c3c;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            margin-left: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📷 Manuel d'Utilisation Photovinc</h1>
+        
+        <p><strong>Version 5.1</strong><span class="version-badge">MISE À JOUR</span> - Guide complet</p>
+
+        <div class="box new">
+            <strong>🆕 Nouveautés version 5.1 :</strong>
+            <ul style="margin-top: 10px;">
+                <li>✓ Sauvegarde des photos même si moins de 4 photos capturées</li>
+                <li>✓ Bouton "Refaire" pour reprendre une photo sans perdre les autres</li>
+                <li>✓ Bouton "Annuler session" pour tout arrêter</li>
+                <li>✓ Affichage du nombre de photos déjà sauvegardées</li>
+            </ul>
+        </div>
+
+        <h2>🎯 Démarrage Rapide</h2>
+        
+        <ol>
+            <li><strong>Brancher</strong> l'appareil photo et l'imprimante</li>
+            <li><strong>Allumer</strong> les deux appareils</li>
+            <li><strong>Lancer</strong> l'application</li>
+            <li>L'imprimante est <strong>détectée automatiquement</strong> ✅</li>
+        </ol>
+
+        <div class="box success">
+            <strong>✨ Détection intelligente :</strong> L'imprimante est maintenant détectée automatiquement, que ce soit en USB ou sur le réseau WiFi !
+        </div>
+
+        <h2>📸 Prendre des Photos</h2>
+
+        <h3>Session de photos (1 à 4 photos)<span class="badge">NOUVEAU</span></h3>
+        <ol>
+            <li><strong>Choisir un style</strong> en cliquant sur le bouton violet (Polaroid, Vintage, Timbre, Fête, Normal)</li>
+            <li>Cliquer sur <strong>"PRENDRE 4 PHOTOS"</strong> (bouton vert)</li>
+            <li><strong>Poser</strong> pour chaque photo (compte à rebours 3, 2, 1)</li>
+            <li>Après chaque photo, <strong>3 options</strong> s'affichent :
+                <ul>
+                    <li><strong>✓ ENREGISTRER</strong> - Garder la photo et passer à la suivante</li>
+                    <li><strong>↻ REFAIRE</strong> - Reprendre cette photo (les autres sont conservées)</li>
+                    <li><strong>✗ ANNULER SESSION</strong> - Tout arrêter et recommencer</li>
+                </ul>
+            </li>
+            <li>Le nombre de photos déjà capturées s'affiche en haut à gauche</li>
+            <li>Attendre le <strong>traitement</strong></li>
+            <li><strong>Sélectionner</strong> la photo à imprimer en touchant l'image</li>
+            <li>Cliquer sur <strong>"IMPRIMER"</strong>, <strong>"QR CODE"</strong> ou <strong>"Tout Imprimer"</strong></li>
+        </ol>
+
+        <div class="box feature">
+            <strong>💡 Flexibilité totale :</strong> Vous n'êtes plus obligé de prendre 4 photos ! Vous pouvez :
+            <ul style="margin-top: 10px;">
+                <li>✓ Prendre 1 seule photo et l'enregistrer</li>
+                <li>✓ Prendre 2 ou 3 photos seulement</li>
+                <li>✓ Refaire une photo sans perdre les autres</li>
+                <li>✓ Annuler et tout recommencer</li>
+            </ul>
+        </div>
+
+        <h3>Test Photo</h3>
+        <p>Cliquez sur <strong>"TEST PHOTO"</strong> pour faire un essai rapide sans enregistrer dans la galerie.</p>
+
+        <h2>🖼️ Galerie</h2>
+
+        <p>Cliquez sur le bouton rouge <strong>"GALERIE"</strong> pour voir toutes vos photos.</p>
+
+        <h3>Actions disponibles</h3>
+        <p>Cliquez sur une miniature pour :</p>
+        <ul>
+            <li><strong>Imprimer</strong> la photo</li>
+            <li><strong>Générer un QR Code</strong> pour partager sur mobile</li>
+            <li><strong>Supprimer</strong> la photo</li>
+        </ul>
+
+        <h3>🎞️ Créer un montage</h3>
+        
+        <p>Nouveau : Créez un montage de 4 photos au format pellicule !</p>
+        
+        <ol>
+            <li>Dans la galerie, cliquer sur <strong>"🎞️ Créer Montage"</strong></li>
+            <li>Sélectionner 4 photos en cliquant dessus</li>
+            <li>Un cadre vert apparaît autour des photos sélectionnées</li>
+            <li>Le compteur affiche "Sélectionnées: X/4"</li>
+            <li>Cliquer sur <strong>"Créer le montage"</strong> quand 4 photos sont sélectionnées</li>
+            <li>Le montage est créé et enregistré dans la galerie</li>
+        </ol>
+
+        <div class="box info">
+            <strong>💡 Astuce :</strong> Le montage reprend le style actuel (Polaroid, Vintage, etc.) et assemble les 4 photos en format pellicule verticale.
+        </div>
+
+        <h3>📦 Télécharger toutes les photos</h3>
+        
+        <p>Téléchargez toutes vos photos en un seul fichier ZIP !</p>
+        
+        <ol>
+            <li>Dans la galerie, cliquer sur <strong>"📦 Télécharger ZIP"</strong></li>
+            <li>L'archive est créée automatiquement</li>
+            <li>Choisir une option :
+                <ul>
+                    <li><strong>📱 QR Code Mobile</strong> - Scanner avec votre smartphone pour télécharger</li>
+                    <li><strong>📂 Ouvrir le dossier</strong> - Accéder au fichier ZIP sur l'ordinateur</li>
+                </ul>
+            </li>
+        </ol>
+
+        <div class="box feature">
+            <strong>⏱️ Nettoyage automatique :</strong> Les archives ZIP sont automatiquement supprimées après 1 heure (configurable de 30 min à 6 heures) pour économiser l'espace disque.
+        </div>
+
+        <h2>🎨 Styles Disponibles</h2>
+
+        <ul>
+            <li><strong>📸 Polaroid</strong> - Bordure blanche avec date</li>
+            <li><strong>🎞️ Vintage</strong> - Effet sépia années 70</li>
+            <li><strong>✉️ Timbre</strong> - Style carte postale avec tampon</li>
+            <li><strong>🎉 Fête</strong> - Bordure colorée avec confettis</li>
+            <li><strong>📷 Normal</strong> - Photo brute sans effet</li>
+        </ul>
+
+        <div class="box info">
+            <strong>🎨 Application automatique :</strong> Le style est appliqué automatiquement à toutes les photos de la session, y compris aux montages créés.
+        </div>
+
+        <h2>📱 Partager via QR Code</h2>
+
+        <h3>Option 1 : Depuis la session de photos</h3>
+        <ol>
+            <li>Après avoir pris des photos, cliquer sur <strong>"QR CODE"</strong></li>
+            <li>Sélectionner la photo à partager</li>
+            <li>Un QR Code s'affiche en plein écran</li>
+            <li><strong>Scanner</strong> avec un smartphone pour télécharger la photo</li>
+        </ol>
+
+        <h3>Option 2 : Depuis la galerie</h3>
+        <ol>
+            <li>Ouvrir la galerie</li>
+            <li>Cliquer sur une photo</li>
+            <li>Cliquer sur <strong>"QR Code"</strong></li>
+            <li>Scanner avec un smartphone</li>
+        </ol>
+
+        <h3>Option 3 : QR Code pour tout télécharger (ZIP)</h3>
+        <ol>
+            <li>Dans la galerie, créer une archive ZIP</li>
+            <li>Choisir <strong>"📱 QR Code Mobile"</strong></li>
+            <li>Scanner pour télécharger toutes les photos en une fois</li>
+        </ol>
+
+        <div class="box info">
+            <strong>📶 Nécessite une connexion WiFi :</strong> Le smartphone et le photomaton doivent être sur le même réseau.
+        </div>
+
+        <h2>🖨️ Imprimante</h2>
+
+        <h3>Détection automatique</h3>
+        <p>L'imprimante Canon SELPHY est détectée automatiquement :</p>
+        <ul>
+            <li><strong>🔌 USB</strong> - Connexion directe</li>
+            <li><strong>🌐 Réseau</strong> - WiFi ou Ethernet (protocoles IPP/IPPS)</li>
+            <li>Le modèle détecté s'affiche dans la barre de titre : <code>🟢 CP-1300</code></li>
+        </ul>
+
+        <h3>Boutons de maintenance</h3>
+        <ul>
+            <li><strong>Diagnostic</strong> - Affiche l'état détaillé de l'imprimante avec solutions</li>
+            <li><strong>Annuler Jobs</strong> - Annule les impressions en attente</li>
+            <li><strong>Reset</strong> - Redémarre l'imprimante</li>
+        </ul>
+
+        <div class="box warning">
+            <strong>⚠️ Problème d'impression ?</strong>
+            <ol>
+                <li>Cliquer sur <strong>"Diagnostic"</strong> dans la barre d'outils</li>
+                <li>Le système affiche le problème exact et les solutions</li>
+                <li>Suivre les instructions affichées</li>
+                <li>Exemples de diagnostics :
+                    <ul>
+                        <li><strong>Job bloqué</strong> → Cliquer "Annuler jobs"</li>
+                        <li><strong>Mauvais papier</strong> → Charger du Postcard 10×15cm</li>
+                        <li><strong>En pause</strong> → Cliquer "Reset"</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <h2>📊 Compteur et Statistiques</h2>
+
+        <p>Cliquez sur les icônes <strong>🖨️</strong> (impressions) ou <strong>📷</strong> (photos) dans la barre de titre pour voir :</p>
+        <ul>
+            <li>Nombre total d'impressions</li>
+            <li>Nombre total de photos prises</li>
+            <li>Statistiques détaillées par style (Polaroid, Vintage, etc.)</li>
+            <li>Sessions enregistrées avec date et heure</li>
+            <li>Informations sur la galerie (nombre de photos, espace utilisé)</li>
+        </ul>
+
+        <h3>Réinitialiser le compteur</h3>
+        <ol>
+            <li>Cliquer sur le compteur (icône 🖨️ ou 📷)</li>
+            <li>Choisir une option :
+                <ul>
+                    <li><strong>"🔄 Réinitialiser Compteur"</strong> - Remet à zéro les statistiques (garde les photos)</li>
+                    <li><strong>"🗑️ Reset + Vider Galerie"</strong> - Supprime tout (crée un backup ZIP automatique)</li>
+                </ul>
+            </li>
+            <li>Entrer le mot de passe admin (par défaut : <code>admin123</code>)</li>
+            <li>Confirmer l'action</li>
+        </ol>
+
+        <div class="box success">
+            <strong>💾 Sécurité :</strong> Avant de vider la galerie, un backup automatique est créé dans le dossier <code>Photos_photovinc_backup</code>.
+        </div>
+
+        <h2>📡 WiFi</h2>
+
+        <p>Cliquer sur le bouton <strong>"WiFi"</strong> pour configurer la connexion sans fil.</p>
+
+        <ol>
+            <li>Les réseaux disponibles sont scannés automatiquement</li>
+            <li>Sélectionner votre réseau dans la liste</li>
+            <li>Entrer le mot de passe</li>
+            <li>Cliquer sur <strong>"Se connecter"</strong></li>
+            <li>Attendre la confirmation de connexion</li>
+        </ol>
+
+        <div class="box info">
+            <strong>⌨️ Clavier virtuel :</strong> Disponible automatiquement pour faciliter la saisie sur écran tactile.
+        </div>
+
+        <h2>☁️ NextCloud</h2>
+
+        <p>Synchronisez automatiquement vos photos sur votre cloud personnel.</p>
+
+        <h3>Configuration</h3>
+        <ol>
+            <li>Cliquer sur <strong>"NextCloud"</strong></li>
+            <li>Cliquer sur <strong>"Configuration"</strong></li>
+            <li>Renseigner les informations :
+                <ul>
+                    <li><strong>URL du serveur</strong> (ex: https://cloud.example.com)</li>
+                    <li><strong>Nom d'utilisateur</strong></li>
+                    <li><strong>Mot de passe</strong> ou token d'application</li>
+                    <li><strong>Dossier de destination</strong> (ex: Photos/Photomaton)</li>
+                </ul>
+            </li>
+            <li>Cliquer sur <strong>"Tester la connexion"</strong></li>
+            <li>Si le test réussit, cliquer sur <strong>"Sauvegarder"</strong></li>
+        </ol>
+
+        <h3>Options disponibles</h3>
+        <ul>
+            <li><strong>☑ Upload automatique</strong> - Envoie les photos vers NextCloud après chaque session</li>
+            <li><strong>☑ Dossiers datés</strong> - Organise par date (2025-01-15/photo.jpg)</li>
+        </ul>
+
+        <h3>Uploader manuellement</h3>
+        <ol>
+            <li>Prendre des photos</li>
+            <li>Cliquer sur <strong>"NextCloud"</strong></li>
+            <li>Cliquer sur <strong>"Upload dernières photos"</strong></li>
+            <li>Une barre de progression s'affiche</li>
+        </ol>
+
+        <h2>🔧 Paramètres ZIP</h2>
+
+        <p>Configuration du nettoyage automatique des archives ZIP :</p>
+
+        <ol>
+            <li>Après avoir créé une archive ZIP, des options s'affichent</li>
+            <li>Choisir la durée de vie des archives :
+                <ul>
+                    <li><strong>30 minutes</strong> - Nettoyage rapide</li>
+                    <li><strong>1 heure</strong> - Par défaut</li>
+                    <li><strong>2 heures</strong></li>
+                    <li><strong>3 heures</strong></li>
+                    <li><strong>6 heures</strong> - Conservation longue</li>
+                </ul>
+            </li>
+            <li>Les archives plus anciennes sont automatiquement supprimées</li>
+            <li>Le temps restant s'affiche : "⏱️ Expire dans X minutes"</li>
+        </ol>
+
+        <div class="box success">
+            <strong>🧹 Nettoyage automatique :</strong> Le système supprime automatiquement les vieilles archives toutes les 10 minutes pour libérer de l'espace disque.
+        </div>
+
+        <h2>❓ Problèmes Courants</h2>
+
+        <h3>L'imprimante n'imprime pas</h3>
+        <ul>
+            <li>Vérifier que l'imprimante est allumée et connectée</li>
+            <li>Cliquer sur <strong>"Diagnostic"</strong> pour voir le problème exact</li>
+            <li>Vérifier le papier (format Postcard 10×15cm requis)</li>
+            <li>Essayer <strong>"Annuler Jobs"</strong> puis <strong>"Reset"</strong></li>
+            <li>Si le problème persiste, débrancher/rebrancher l'imprimante</li>
+        </ul>
+
+        <h3>Certaines photos ne sont pas enregistrées</h3>
+        <ul>
+            <li>✓ Avec la version 5.1, toutes les photos validées sont sauvegardées</li>
+            <li>Vérifier d'avoir cliqué sur <strong>"✓ ENREGISTRER"</strong> et non "↻ REFAIRE"</li>
+            <li>Le compteur de photos s'affiche en haut à gauche pendant la session</li>
+        </ul>
+
+        <h3>Le QR Code ne fonctionne pas</h3>
+        <ul>
+            <li>Vérifier que le serveur web est actif (barre de titre : <code>Serveur: OK</code>)</li>
+            <li>Cliquer sur "Serveur: OK" pour voir l'URL et l'IP</li>
+            <li>Vérifier que le smartphone est sur le <strong>même réseau WiFi</strong></li>
+            <li>Scanner à nouveau le QR code</li>
+            <li>Essayer d'ouvrir manuellement l'URL affichée</li>
+        </ul>
+
+        <h3>L'appareil photo ne répond pas</h3>
+        <ul>
+            <li>Vérifier que l'appareil est allumé et en mode PTP/MTP</li>
+            <li>Vérifier le câble USB (essayer un autre port)</li>
+            <li>Débrancher/rebrancher l'appareil photo</li>
+            <li>Redémarrer l'application</li>
+        </ul>
+
+        <h3>Le montage ne se crée pas</h3>
+        <ul>
+            <li>Vérifier d'avoir sélectionné exactement 4 photos</li>
+            <li>Le bouton "Créer le montage" doit être vert</li>
+            <li>Vérifier que le plugin décorateur est actif</li>
+        </ul>
+
+        <h3>Les archives ZIP ne sont pas nettoyées</h3>
+        <ul>
+            <li>Le nettoyage automatique s'exécute toutes les 10 minutes</li>
+            <li>Vous pouvez nettoyer manuellement : cliquer sur "🧹 Nettoyer maintenant"</li>
+            <li>Vérifier la durée de vie configurée (par défaut 1 heure)</li>
+        </ul>
+
+        <h2>📞 Aide et Informations</h2>
+
+        <div class="box info">
+            <p><strong>Mot de passe admin par défaut :</strong> <code>admin123</code></p>
+            <p><strong>⚠️ IMPORTANT :</strong> Changez-le immédiatement pour des raisons de sécurité !</p>
+        </div>
+
+        <h3>Dossiers importants</h3>
+        <ul>
+            <li><code>~/Photos_photovinc</code> - Galerie principale</li>
+            <li><code>~/Photos_photovinc_backup</code> - Sauvegardes automatiques</li>
+            <li><code>~/Photos_photovinc/exports</code> - Archives ZIP temporaires</li>
+        </ul>
+
+        <h3>Raccourcis clavier</h3>
+        <ul>
+            <li><strong>F11</strong> - Mode plein écran</li>
+            <li><strong>ESC</strong> - Quitter le mode plein écran</li>
+        </ul>
+
+        <div class="box feature">
+            <strong>💡 Conseils d'utilisation :</strong>
+            <ul style="margin-top: 10px;">
+                <li>Utilisez du papier Canon KP-36IP ou KP-108IN pour de meilleurs résultats</li>
+                <li>Nettoyez régulièrement l'objectif de l'appareil photo</li>
+                <li>Pensez à sauvegarder vos photos importantes sur NextCloud ou USB</li>
+                <li>Vérifiez le compteur régulièrement pour suivre votre activité</li>
+            </ul>
+        </div>
+
+        <p style="text-align: center; margin-top: 50px; color: #777;">
+            <strong>Photovinc v5.1</strong> - Janvier 2026<br>
+            <small>Mise à jour : Sauvegarde partielle des photos et création de montages</small>
+        </p>
+    </div>
+</body>
+</html>

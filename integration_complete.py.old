@@ -550,16 +550,6 @@ class photovincAppComplete:
         ).pack(side=tk.RIGHT, padx=10, pady=10)
         tk.Button(
             title_frame,
-            text="🎞️ Créer Montage",
-            font=('Arial', 12, 'bold'),
-            bg='#9b59b6',
-            fg='white',
-            width=16,
-            command=lambda: [gallery_win.destroy(), self.create_montage_from_selection()]
-        ).pack(side=tk.RIGHT, padx=10, pady=10)
-
-        tk.Button(
-            title_frame,
             text="Fermer",
             font=('Arial', 12, 'bold'),
             bg='#e74c3c',
@@ -619,175 +609,7 @@ class photovincAppComplete:
             except:
                 pass
     
-    def create_montage_from_selection(self):
-        """Crée un montage à partir de 4 photos sélectionnées dans la galerie"""
-        photos = sorted(self.photo_dir.glob("*.jpg"), reverse=True)
-        
-        if len(photos) < 4:
-            messagebox.showinfo("Info", "Il faut au moins 4 photos pour créer un montage")
-            return
-        
-        selection_win = tk.Toplevel(self.root)
-        selection_win.title("Sélectionner 4 photos pour le montage")
-        selection_win.geometry("900x600")
-        selection_win.configure(bg='#2c3e50')
-        selection_win.transient(self.root)
-        selection_win.grab_set()
-        
-        # Centrer
-        selection_win.update_idletasks()
-        x = (selection_win.winfo_screenwidth() // 2) - 450
-        y = (selection_win.winfo_screenheight() // 2) - 300
-        selection_win.geometry(f"900x600+{x}+{y}")
-        
-        # Titre
-        title_frame = tk.Frame(selection_win, bg='#34495e')
-        title_frame.pack(fill=tk.X)
-        
-        selected_photos = []
-        
-        counter_label = tk.Label(
-            title_frame,
-            text=f"Sélectionnées: 0/4",
-            font=('Arial', 16, 'bold'),
-            bg='#34495e',
-            fg='#3498db'
-        )
-        counter_label.pack(side=tk.LEFT, padx=20, pady=15)
-        
-        tk.Button(
-            title_frame,
-            text="Annuler",
-            font=('Arial', 12, 'bold'),
-            bg='#e74c3c',
-            fg='white',
-            width=12,
-            command=selection_win.destroy
-        ).pack(side=tk.RIGHT, padx=20, pady=10)
-        
-        create_btn = tk.Button(
-            title_frame,
-            text="Créer le montage",
-            font=('Arial', 12, 'bold'),
-            bg='#95a5a6',
-            fg='white',
-            width=15,
-            state=tk.DISABLED
-        )
-        create_btn.pack(side=tk.RIGHT, padx=10, pady=10)
-        
-        # Frame avec scroll
-        canvas = tk.Canvas(selection_win, bg='#2c3e50', highlightthickness=0)
-        scrollbar = tk.Scrollbar(selection_win, orient="vertical", command=canvas.yview, width=25)
-        scrollable_frame = tk.Frame(canvas, bg='#2c3e50')
-        
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-        
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-        
-        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        
-        photo_buttons = {}
-        
-        def toggle_selection(photo_path, frame):
-            if photo_path in selected_photos:
-                selected_photos.remove(photo_path)
-                frame.config(bg='#34495e', relief=tk.RAISED, bd=2)
-            else:
-                if len(selected_photos) < 4:
-                    selected_photos.append(photo_path)
-                    frame.config(bg='#27ae60', relief=tk.SOLID, bd=4)
-                else:
-                    messagebox.showinfo("Limite", "Vous ne pouvez sélectionner que 4 photos", parent=selection_win)
-            
-            counter_label.config(text=f"Sélectionnées: {len(selected_photos)}/4")
-            
-            if len(selected_photos) == 4:
-                create_btn.config(state=tk.NORMAL, bg='#27ae60')
-            else:
-                create_btn.config(state=tk.DISABLED, bg='#95a5a6')
-        
-        # Afficher les photos (4 par ligne)
-        for idx, photo_path in enumerate(photos[:40]):
-            row = idx // 4
-            col = idx % 4
-            
-            frame = tk.Frame(scrollable_frame, bg='#34495e', relief=tk.RAISED, bd=2, cursor="hand2")
-            frame.grid(row=row, column=col, padx=8, pady=8)
-            photo_buttons[photo_path] = frame
-            
-            try:
-                img = Image.open(photo_path)
-                img.thumbnail((180, 120), Image.Resampling.LANCZOS)
-                photo = ImageTk.PhotoImage(img)
-                
-                btn = tk.Button(
-                    frame,
-                    image=photo,
-                    command=lambda p=photo_path, f=frame: toggle_selection(p, f),
-                    cursor="hand2",
-                    bg='#34495e'
-                )
-                btn.image = photo
-                btn.pack(padx=3, pady=3)
-                
-                filename = photo_path.name[:20] + "..." if len(photo_path.name) > 20 else photo_path.name
-                tk.Label(
-                    frame,
-                    text=filename,
-                    font=('Arial', 8),
-                    bg='#34495e',
-                    fg='#ecf0f1'
-                ).pack(pady=3)
-            except:
-                pass
-        
-        def create_montage():
-            if len(selected_photos) != 4:
-                return
-            
-            selection_win.destroy()
-            
-            decorator = self.plugin_manager.get_plugin("decorator")
-            if not decorator or not decorator.is_initialized():
-                messagebox.showerror("Erreur", "Plugin décorateur non disponible")
-                return
-            
-            self.show_message("Création du montage...", '#3498db', 16)
-            self.root.update()
-            
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            montage_path = str(self.photo_dir / f"montage_{self.current_style}_{timestamp}.jpg")
-            
-            # Convertir Path en str pour les photos
-            photos_str = [str(p) for p in selected_photos]
-            
-            if decorator.create_film_strip(photos_str, self.current_style, montage_path):
-                messagebox.showinfo("Succès", f"Montage créé !\n{Path(montage_path).name}")
-                
-                # Afficher le montage
-                try:
-                    img = Image.open(montage_path)
-                    img.thumbnail((750, 500), Image.Resampling.LANCZOS)
-                    photo = ImageTk.PhotoImage(img)
-                    self.preview_label.config(image=photo, text="")
-                    self.preview_label.image = photo
-                except:
-                    pass
-            else:
-                messagebox.showerror("Erreur", "Échec création du montage")
-            
-            self.show_message("Prêt !", '#ecf0f1', 14)
-        
-        create_btn.config(command=create_montage)
-    
-        def show_photo_actions(self, photo_path, parent_win):
-            pass
+    def show_photo_actions(self, photo_path, parent_win):
         """Affiche les actions possibles pour une photo"""
         actions_win = tk.Toplevel(parent_win)
         actions_win.title("Actions")
@@ -1578,7 +1400,7 @@ Max: {profile.get('max_width', 'N/A')}x{profile.get('max_height', 'N/A')}mm
                 self.show_message("Erreur affichage", '#e74c3c', 14)
         
     def take_four_photos(self):
-        """Prend jusqu'à 4 photos avec validation après chaque prise"""
+        """Prend 4 photos"""
         if self.is_capturing:
             return
         
@@ -1595,9 +1417,7 @@ Max: {profile.get('max_width', 'N/A')}x{profile.get('max_height', 'N/A')}mm
         captured_photos = []
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
-        photo_num = 1
-        while photo_num <= 4:
-            # Compte à rebours
+        for photo_num in range(1, 5):
             for i in range(3, 0, -1):
                 self.show_message(f"Photo {photo_num}/4\n\n{i}...", '#f39c12', 32)
                 self.root.update()
@@ -1610,58 +1430,32 @@ Max: {profile.get('max_width', 'N/A')}x{profile.get('max_height', 'N/A')}mm
             success = camera.capture_image(temp_file)
             
             if success and os.path.exists(temp_file):
-                # Afficher la photo en plein écran avec validation
-                keep_photo = self.show_photo_validation(temp_file, photo_num, len(captured_photos))
-                
-                if keep_photo is None:
-                    # L'utilisateur a annulé la session
-                    for temp in captured_photos:
-                        try:
-                            os.remove(temp)
-                        except:
-                            pass
-                    self.show_message("Session annulée", '#e67e22', 14)
-                    self.reset_session()
-                    return
-                elif keep_photo:
-                    # Photo conservée
-                    captured_photos.append(temp_file)
-                    photo_num += 1
-                else:
-                    # Photo supprimée, on la refait
-                    try:
-                        os.remove(temp_file)
-                    except:
-                        pass
-                    # On ne change pas photo_num pour refaire la même
-            else:
-                messagebox.showerror("Erreur", f"Échec capture photo {photo_num}")
-                break
+                captured_photos.append(temp_file)
+            
+            if photo_num < 4:
+                time.sleep(1)
         
-        # ✅ CORRECTION : Sauvegarder les photos même si < 4
-        if len(captured_photos) >= 1:
+        if len(captured_photos) >= 4:
             self.show_message("Traitement...", '#3498db', 16)
             self.root.update()
             
             self.last_session_photos = []
             
             # ✅ ENREGISTRER LA SESSION DANS LE COMPTEUR
-            self.print_counter.increment_session(len(captured_photos), self.current_style)
+            self.print_counter.increment_session(4, self.current_style)
             self.update_counter_display()
             
-            # Appliquer le style et sauvegarder
+            if decorator and decorator.is_initialized():
+                montage_path = str(self.photo_dir / f"montage_{self.current_style}_{timestamp}.jpg")
+                if decorator.create_film_strip(captured_photos, self.current_style, montage_path):
+                    self.last_session_photos.append(montage_path)
+            
             for i, photo_path in enumerate(captured_photos):
                 output_path = str(self.photo_dir / f"photo_{self.current_style}_{timestamp}_{i+1}.jpg")
                 if decorator and decorator.is_initialized():
                     if decorator.apply_style(photo_path, self.current_style, output_path):
                         self.last_session_photos.append(output_path)
-                else:
-                    # Copier sans style
-                    import shutil
-                    shutil.copy(photo_path, output_path)
-                    self.last_session_photos.append(output_path)
             
-            # Supprimer les fichiers temporaires
             for temp_file in captured_photos:
                 try:
                     os.remove(temp_file)
@@ -1671,126 +1465,10 @@ Max: {profile.get('max_width', 'N/A')}x{profile.get('max_height', 'N/A')}mm
             # Upload auto vers NextCloud si configuré
             self.auto_upload_to_nextcloud()
             
-            # Afficher le message approprié
-            if len(captured_photos) == 4:
-                self.show_print_selection()
-            else:
-                msg = f"{len(captured_photos)} photo(s) sauvegardée(s) !"
-                self.show_message(msg, '#2ecc71', 16, timeout=3)
-                self.root.after(3000, self.show_print_selection)
+            self.show_print_selection()
         else:
-            self.show_message("Aucune photo capturée", '#e74c3c', 14)
+            self.show_message("Session incomplète", '#e74c3c', 14)
             self.reset_session()
-    
-    def show_photo_validation(self, photo_path, photo_num, photos_captured=0):
-        """Affiche la photo en plein écran avec boutons Enregistrer/Supprimer/Annuler"""
-        validation_result = {"keep": False, "cancel": False}
-        
-        validation_win = tk.Toplevel(self.root)
-        validation_win.title(f"Photo {photo_num}/4")
-        validation_win.attributes('-fullscreen', True)
-        validation_win.configure(bg='#000000')
-        validation_win.transient(self.root)
-        validation_win.grab_set()
-        
-        # Afficher la photo
-        try:
-            img = Image.open(photo_path)
-            
-            # Adapter à l'écran (garder ratio)
-            screen_w = validation_win.winfo_screenwidth()
-            screen_h = validation_win.winfo_screenheight() - 200  # Espace pour boutons
-            
-            img.thumbnail((screen_w, screen_h), Image.Resampling.LANCZOS)
-            photo = ImageTk.PhotoImage(img)
-            
-            img_label = tk.Label(validation_win, image=photo, bg='#000000')
-            img_label.image = photo
-            img_label.pack(expand=True, pady=(20, 0))
-        except Exception as e:
-            tk.Label(
-                validation_win,
-                text=f"Erreur affichage: {e}",
-                font=('Arial', 16),
-                bg='#000000',
-                fg='#e74c3c'
-            ).pack(expand=True)
-        
-        # Info en haut
-        if photos_captured > 0:
-            info_label = tk.Label(
-                validation_win,
-                text=f"✓ {photos_captured} photo(s) déjà sauvegardée(s)",
-                font=('Arial', 14, 'bold'),
-                bg='#000000',
-                fg='#2ecc71'
-            )
-            info_label.place(x=20, y=20)
-        
-        # Boutons
-        btn_frame = tk.Frame(validation_win, bg='#000000')
-        btn_frame.pack(side=tk.BOTTOM, pady=30)
-        
-        def save_photo():
-            validation_result["keep"] = True
-            validation_win.destroy()
-        
-        def delete_photo():
-            validation_result["keep"] = False
-            validation_win.destroy()
-        
-        def cancel_session():
-            if photos_captured > 0:
-                if messagebox.askyesno(
-                    "Confirmer",
-                    f"Annuler la session ?{photos_captured} photo(s) déjà capturée(s) seront perdues.",
-                    parent=validation_win
-                ):
-                    validation_result["cancel"] = True
-                    validation_win.destroy()
-            else:
-                validation_result["cancel"] = True
-                validation_win.destroy()
-        
-        tk.Button(
-            btn_frame,
-            text="✓ ENREGISTRER",
-            font=('Arial', 20, 'bold'),
-            bg='#27ae60',
-            fg='white',
-            width=18,
-            height=3,
-            command=save_photo
-        ).pack(side=tk.LEFT, padx=15)
-        
-        tk.Button(
-            btn_frame,
-            text="↻ REFAIRE",
-            font=('Arial', 20, 'bold'),
-            bg='#e67e22',
-            fg='white',
-            width=18,
-            height=3,
-            command=delete_photo
-        ).pack(side=tk.LEFT, padx=15)
-        
-        tk.Button(
-            btn_frame,
-            text="✗ ANNULER SESSION",
-            font=('Arial', 16, 'bold'),
-            bg='#e74c3c',
-            fg='white',
-            width=18,
-            height=3,
-            command=cancel_session
-        ).pack(side=tk.LEFT, padx=15)
-        
-        # Attendre la décision
-        validation_win.wait_window()
-        
-        if validation_result["cancel"]:
-            return None  # Annulation de la session
-        return validation_result["keep"]
     
     def show_print_selection(self):
         """Affiche sélection photos avec images complètes"""

@@ -1,0 +1,1343 @@
+ 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation Complète Photomaton</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .toc h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .toc ul {
+            list-style: none;
+            column-count: 2;
+            column-gap: 30px;
+        }
+        
+        .toc li {
+            margin: 10px 0;
+            break-inside: avoid;
+        }
+        
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: block;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        
+        .toc a:hover {
+            background: #667eea;
+            color: white;
+            padding-left: 15px;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+            scroll-margin-top: 20px;
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2em;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .section h2::before {
+            content: "▶";
+            color: #667eea;
+            font-size: 0.7em;
+        }
+        
+        .section h3 {
+            color: #34495e;
+            margin: 25px 0 15px 0;
+            font-size: 1.4em;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .code-block .command {
+            color: #98c379;
+        }
+        
+        .code-block .comment {
+            color: #5c6370;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .warning-box {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .success-box {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .config-box {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .config-item:last-child {
+            border-bottom: none;
+        }
+        
+        .config-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .config-value {
+            color: #212529;
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        th {
+            background: #2c3e50;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .tag {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            margin: 5px 5px 5px 0;
+            font-weight: 600;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.protected {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        ul, ol {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+        
+        li {
+            margin: 10px 0;
+        }
+        
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        footer p {
+            margin: 5px 0;
+        }
+        
+        .step {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+            }
+            .toc ul {
+                column-count: 1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .toc ul {
+                column-count: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📸 Documentation Photomaton</h1>
+            <p>Guide complet d'installation, configuration et maintenance</p>
+            <p style="font-size: 0.9em; margin-top: 15px; opacity: 0.8;">Raspberry Pi 4 + Écran tactile + Canon SELPHY CP400</p>
+        </header>
+        
+        <div class="content">
+            <!-- TABLE DES MATIÈRES -->
+            <div class="toc">
+                <h2>📋 Table des matières</h2>
+                <ul>
+                    <li><a href="#systeme">1. Système et matériel</a></li>
+                    <li><a href="#ecran-tactile">2. Configuration écran tactile</a></li>
+                    <li><a href="#imprimante">3. Installation imprimante Canon CP400</a></li>
+                    <li><a href="#autostart">4. Démarrage automatique</a></li>
+                    <li><a href="#plugins">5. Architecture plugins</a></li>
+                    <li><a href="#analytics">6. Plugin Analytics</a></li>
+                    <li><a href="#corrections">7. Corrections appliquées</a></li>
+                    <li><a href="#interface">8. Interface utilisateur</a></li>
+                    <li><a href="#securite">9. Sécurité et mots de passe</a></li>
+                    <li><a href="#tailscale">10. Accès distant (Tailscale)</a></li>
+                    <li><a href="#sauvegarde">11. Sauvegarde et restauration</a></li>
+                    <li><a href="#commandes">12. Commandes utiles</a></li>
+                </ul>
+            </div>
+
+            <!-- 1. SYSTÈME ET MATÉRIEL -->
+            <div id="systeme" class="section">
+                <h2>1. Système et matériel</h2>
+                
+                <h3>Matériel utilisé</h3>
+                <div class="config-box">
+                    <div class="config-item">
+                        <span class="config-label">Ordinateur</span>
+                        <span class="config-value">Raspberry Pi 4</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Écran tactile</span>
+                        <span class="config-value">Display-C 1024x600 Rev3.1 (QDtech)</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Imprimante</span>
+                        <span class="config-value">Canon SELPHY CP400</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Alimentation</span>
+                        <span class="config-value">3A minimum (officielle Raspberry Pi)</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Dossier photos</span>
+                        <span class="config-value">~/Photos_Photomaton</span>
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important :</strong> Une alimentation USB insuffisante peut causer des problèmes d'instabilité du curseur tactile. Utilisez impérativement une alimentation officielle Raspberry Pi 3A ou plus.
+                </div>
+
+                <h3>Connexions requises</h3>
+                <ul>
+                    <li><strong>Écran :</strong> HDMI pour l'affichage + USB pour le tactile</li>
+                    <li><strong>Imprimante :</strong> USB vers Raspberry Pi</li>
+                    <li><strong>Réseau :</strong> WiFi (configuration via interface tactile)</li>
+                </ul>
+            </div>
+
+            <!-- 2. CONFIGURATION ÉCRAN TACTILE -->
+            <div id="ecran-tactile" class="section">
+                <h2>2. Configuration écran tactile Display-C 1024x600</h2>
+                
+                <h3>🔍 Diagnostic initial</h3>
+                <p>Vérifier la détection du périphérique tactile :</p>
+                <div class="code-block">
+<span class="command">lsusb</span>
+<span class="comment"># Doit afficher : Bus 001 Device 004: ID 0483:5750 STMicroelectronics</span>
+
+<span class="command">ls -la /dev/input/</span>
+<span class="comment"># Doit montrer plusieurs event0, event1, etc.</span>
+</div>
+
+                <h3>⚙️ Passage de Wayland à X11</h3>
+                <p>Le tactile nécessite X11 au lieu de Wayland :</p>
+                <div class="code-block">
+<span class="command">sudo raspi-config</span>
+<span class="comment"># Naviguez vers : Advanced Options → Wayland → X11</span>
+<span class="comment"># Puis redémarrez</span>
+</div>
+
+                <h3>📐 Configuration de la résolution</h3>
+                <p>Modifier le fichier de configuration :</p>
+                <div class="code-block">
+<span class="command">sudo nano /boot/firmware/config.txt</span>
+<span class="comment"># ou</span>
+<span class="command">sudo nano /boot/config.txt</span>
+</div>
+
+                <p>Ajouter ces lignes :</p>
+                <div class="code-block">
+hdmi_group=2
+hdmi_mode=87
+hdmi_cvt=1024 600 60 6 0 0 0
+hdmi_drive=2
+display_hdmi_rotate=0
+</div>
+
+                <h3>🖱️ Configuration du mode personnalisé</h3>
+                <div class="code-block">
+<span class="comment"># Installer les outils nécessaires</span>
+<span class="command">sudo apt-get install x11-xserver-utils</span>
+
+<span class="comment"># Créer le mode personnalisé</span>
+<span class="command">DISPLAY=:0 xrandr --newmode "1024x600_60.00" 49.00 1024 1072 1168 1312 600 603 613 624 -hsync +vsync</span>
+<span class="command">DISPLAY=:0 xrandr --addmode HDMI-1 1024x600_60.00</span>
+<span class="command">DISPLAY=:0 xrandr --output HDMI-1 --mode 1024x600_60.00</span>
+</div>
+
+                <h3>✅ Vérification finale</h3>
+                <div class="code-block">
+<span class="comment"># Vérifier que le tactile est reconnu</span>
+<span class="command">export DISPLAY=:0</span>
+<span class="command">xinput list</span>
+<span class="comment"># Doit afficher : 深圳市全动电子技术有限公司 ByQDtech 触控USB鼠标</span>
+
+<span class="comment"># Tester les événements tactiles</span>
+<span class="command">sudo apt-get install evtest</span>
+<span class="command">sudo evtest</span>
+<span class="comment"># Sélectionner le périphérique ByQDtech et toucher l'écran</span>
+</div>
+
+                <div class="success-box">
+                    <strong>✅ Résultat :</strong> Le tactile fonctionne correctement après avoir résolu le problème d'alimentation USB.
+                </div>
+            </div>
+
+            <!-- 3. INSTALLATION IMPRIMANTE -->
+            <div id="imprimante" class="section">
+                <h2>3. Installation Canon SELPHY CP400</h2>
+                
+                <div class="info-box">
+                    <strong>ℹ️ Pourquoi un backend personnalisé ?</strong> Le backend Gutenprint standard a un bug de détection du type de papier (erreur "01 vs 11"). Le backend personnalisé de selphy_print résout ce problème.
+                </div>
+
+                <h3>Prérequis et préparation</h3>
+                <div class="step">
+                    <h4>Installation des dépendances</h4>
+                    <div class="code-block">
+<span class="command">sudo apt update</span>
+<span class="command">sudo apt install -y build-essential git libusb-1.0-0-dev libjpeg-dev \
+                    libcups2-dev libcupsimage2-dev pkg-config cups</span>
+</div>
+                </div>
+
+                <div class="step">
+                    <h4>Vérifier la connexion de l'imprimante</h4>
+                    <div class="code-block">
+<span class="command">lsusb | grep Canon</span>
+<span class="comment"># Vous devriez voir : ID 04a9:30f6 Canon, Inc. SELPHY CP400</span>
+</div>
+                </div>
+
+                <h3>Installation du backend personnalisé</h3>
+                <div class="code-block">
+<span class="comment"># Aller dans le répertoire home</span>
+<span class="command">cd ~</span>
+
+<span class="comment"># Cloner le dépôt (supprimer l'ancien s'il existe)</span>
+<span class="command">rm -rf selphy_print</span>
+<span class="command">git clone https://git.shaftnet.org/gitea/slp/selphy_print.git</span>
+
+<span class="comment"># Entrer dans le répertoire</span>
+<span class="command">cd selphy_print</span>
+
+<span class="comment"># Compiler et installer</span>
+<span class="command">sudo make install</span>
+</div>
+
+                <div class="success-box">
+                    <strong>✓ Vérification :</strong> Le make install devrait afficher :
+                    <div class="code-block" style="margin-top: 10px;">
+GUTENPRINT VER:    5.3
+CUPS BACKEND DIR:  /usr/lib/cups/backend
+BACKEND NAME:      gutenprint53+usb
+</div>
+                </div>
+
+                <h3>Configuration de CUPS</h3>
+                <div class="step">
+                    <h4>1. Modifier la configuration CUPS</h4>
+                    <div class="code-block">
+<span class="command">sudo nano /etc/cups/cupsd.conf</span>
+</div>
+                    <p>Trouver la section <code>&lt;Location /&gt;</code> et ajouter <code>Allow @LOCAL</code> :</p>
+                    <div class="code-block">
+&lt;Location /&gt;
+  Order allow,deny
+  Allow @LOCAL
+&lt;/Location&gt;
+
+&lt;Location /admin&gt;
+  AuthType Default
+  Require user @SYSTEM
+  Order allow,deny
+  Allow @LOCAL
+&lt;/Location&gt;
+</div>
+                </div>
+
+                <div class="step">
+                    <h4>2. Ajouter l'utilisateur au groupe lpadmin</h4>
+                    <div class="code-block">
+<span class="command">sudo usermod -a -G lpadmin $USER</span>
+<span class="comment"># Déconnectez-vous et reconnectez-vous après cette commande</span>
+</div>
+                </div>
+
+                <div class="step">
+                    <h4>3. Redémarrer CUPS</h4>
+                    <div class="code-block">
+<span class="command">sudo systemctl restart cups</span>
+<span class="command">sleep 3</span>
+</div>
+                </div>
+
+                <h3>Configuration de l'imprimante</h3>
+                <div class="step">
+                    <h4>1. Détecter l'URI de l'imprimante</h4>
+                    <div class="code-block">
+<span class="command">lpinfo -v | grep -i usb</span>
+<span class="comment"># Notez l'URI : gutenprint53+usb://canon-cp400/NONE_UNKNOWN</span>
+</div>
+                </div>
+
+                <div class="step">
+                    <h4>2. Supprimer les anciennes configurations</h4>
+                    <div class="code-block">
+<span class="command">lpstat -a</span>
+<span class="command">sudo lpadmin -x CP_400</span>
+<span class="command">sudo lpadmin -x SELPHY-CP400</span>
+</div>
+                </div>
+
+                <div class="step">
+                    <h4>3. Créer l'imprimante</h4>
+                    <div class="code-block">
+<span class="command">sudo lpadmin -p CP_400 -E \
+  -v "gutenprint53+usb://canon-cp400/NONE_UNKNOWN" \
+  -m gutenprint.5.3://canon-cp400/expert</span>
+
+<span class="command">sudo lpadmin -d CP_400</span>
+
+<span class="command">lpstat -p CP_400</span>
+<span class="comment"># Devrait afficher : printer CP_400 is idle. enabled since...</span>
+</div>
+                </div>
+
+                <h3>Test d'impression</h3>
+                <div class="code-block">
+<span class="comment"># Imprimer une image</span>
+<span class="command">lp -d CP_400 /chemin/vers/votre/image.jpg</span>
+
+<span class="comment"># Vérifier la file d'attente</span>
+<span class="command">lpq -a</span>
+
+<span class="comment"># Surveiller les logs</span>
+<span class="command">sudo tail -f /var/log/cups/error_log</span>
+</div>
+
+                <h3>Options d'impression avancées</h3>
+                <div class="code-block">
+<span class="comment"># Voir toutes les options</span>
+<span class="command">lpoptions -p CP_400 -l</span>
+
+<span class="comment"># Format carte postale</span>
+<span class="command">lp -d CP_400 -o PageSize=Postcard image.jpg</span>
+
+<span class="comment"># Sans bordures</span>
+<span class="command">lp -d CP_400 -o StpBorderless=True image.jpg</span>
+</div>
+
+                <h3>Dépannage imprimante</h3>
+                <div class="warning-box">
+                    <strong>Problème : Jobs bloqués</strong>
+                    <div class="code-block" style="margin-top: 10px;">
+<span class="command">cancel -a</span>
+<span class="command">lpstat -p CP_400</span>
+<span class="command">sudo cupsenable CP_400</span>
+<span class="command">sudo cupsaccept CP_400</span>
+</div>
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 Accès interface web CUPS :</strong> <code>http://localhost:631</code>
+                </div>
+            </div>
+
+            <!-- 4. DÉMARRAGE AUTOMATIQUE -->
+            <div id="autostart" class="section">
+                <h2>4. Lancement automatique du photomaton</h2>
+                
+                <h3>📍 Emplacement du script</h3>
+                <div class="config-box">
+                    <div class="config-item">
+                        <span class="config-label">Script principal</span>
+                        <span class="config-value">~/photomaton/photomaton_complet5.py</span>
+                    </div>
+                </div>
+
+                <h3>🔧 Création du service systemd</h3>
+                <div class="code-block">
+<span class="command">sudo nano /etc/systemd/system/photomaton.service</span>
+</div>
+
+                <p>Contenu du fichier :</p>
+                <div class="code-block">
+[Unit]
+Description=Photomaton Application
+After=graphical.target
+
+[Service]
+Type=simple
+User=vincent
+Environment="DISPLAY=:0"
+Environment="XAUTHORITY=/home/vincent/.Xauthority"
+WorkingDirectory=/home/vincent/photomaton
+ExecStart=/usr/bin/python3 /home/vincent/photomaton/photomaton_complet5.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=graphical.target
+</div>
+
+                <h3>▶️ Activation du service</h3>
+                <div class="code-block">
+<span class="comment"># Recharger les services</span>
+<span class="command">sudo systemctl daemon-reload</span>
+
+<span class="comment"># Activer au démarrage</span>
+<span class="command">sudo systemctl enable photomaton.service</span>
+
+<span class="comment"># Démarrer le service</span>
+<span class="command">sudo systemctl start photomaton.service</span>
+
+<span class="comment"># Vérifier le statut</span>
+<span class="command">sudo systemctl status photomaton.service</span>
+</div>
+
+                <h3>🛠️ Commandes de gestion</h3>
+                <div class="code-block">
+<span class="comment"># Arrêter le service</span>
+<span class="command">sudo systemctl stop photomaton.service</span>
+
+<span class="comment"># Redémarrer le service</span>
+<span class="command">sudo systemctl restart photomaton.service</span>
+
+<span class="comment"># Désactiver le démarrage automatique</span>
+<span class="command">sudo systemctl disable photomaton.service</span>
+
+<span class="comment"># Voir les logs en temps réel</span>
+<span class="command">sudo journalctl -u photomaton.service -f</span>
+</div>
+            </div>
+
+            <!-- 5. ARCHITECTURE PLUGINS -->
+            <div id="plugins" class="section">
+                <h2>5. Architecture plugins</h2>
+                
+                <h3>Plugins disponibles</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Plugin</th>
+                            <th>Statut</th>
+                            <th>Priorité</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Camera</strong></td>
+                            <td><span class="status active">Actif</span></td>
+                            <td>1</td>
+                            <td>Gestion appareil Canon via gphoto2</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Printer</strong></td>
+                            <td><span class="status active">Actif</span></td>
+                            <td>2</td>
+                            <td>Canon CP-400 via CUPS</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Decorator</strong></td>
+                            <td><span class="status active">Actif</span></td>
+                            <td>3</td>
+                            <td>5 styles : Polaroid, Vintage, Timbre, Fête, Normal</td>
+                        </tr>
+                        <tr>
+                            <td><strong>WiFi</strong></td>
+                            <td><span class="status active">Actif</span></td>
+                            <td>4</td>
+                            <td>Configuration réseau avec clavier virtuel</td>
+                        </tr>
+                        <tr>
+                            <td><strong>QR Code</strong></td>
+                            <td><span class="status active">Actif</span></td>
+                            <td>5</td>
+                            <td>Génération QR + serveur web (port 8000)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NextCloud</strong></td>
+                            <td><span class="status active">Actif</span></td>
+                            <td>6</td>
+                            <td>Upload automatique vers le cloud</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Analytics</strong></td>
+                            <td><span class="status active">Actif</span> <span class="status protected">Protégé</span></td>
+                            <td>12</td>
+                            <td>Statistiques d'utilisation complètes</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Configuration plugins</h3>
+                <div class="config-box">
+                    <div class="config-item">
+                        <span class="config-label">Fichier de configuration</span>
+                        <span class="config-value">~/.photomaton_plugins.json</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Interface de gestion</span>
+                        <span class="config-value">plugin_ui.py</span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 Activation/désactivation :</strong> Gérez les plugins via l'interface graphique sans modification de code.
+                </div>
+            </div>
+
+            <!-- 6. PLUGIN ANALYTICS -->
+            <div id="analytics" class="section">
+                <h2>6. Plugin Analytics</h2>
+                <span class="tag">Nouveau</span>
+                <span class="tag">Protection par mot de passe</span>
+                
+                <h3>Fonctionnalités</h3>
+                <div class="config-box">
+                    <strong>Tracking automatique :</strong>
+                    <ul style="margin-top: 10px;">
+                        <li>Sessions totales</li>
+                        <li>Photos prises (compteur)</li>
+                        <li>Impressions effectuées</li>
+                        <li>QR Codes générés</li>
+                        <li>Style préféré</li>
+                        <li>Jour/heure de pointe</li>
+                    </ul>
+                </div>
+
+                <h3>Sécurité</h3>
+                <div class="warning-box">
+                    <strong>Accès protégé par mot de passe</strong>
+                    <ul style="margin-top: 10px;">
+                        <li>Mot de passe requis pour afficher les statistiques</li>
+                        <li>Mot de passe requis pour réinitialiser</li>
+                        <li>Clavier virtuel disponible pour la saisie</li>
+                        <li>Même mot de passe que le compteur d'impressions</li>
+                    </ul>
+                </div>
+
+                <div class="config-box">
+                    <div class="config-item">
+                        <span class="config-label">Mot de passe par défaut</span>
+                        <span class="config-value">admin123</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Fichier de données</span>
+                        <span class="config-value">~/.photomaton_analytics.json</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">Accès interface</span>
+                        <span class="config-value">Bouton "Stats"</span>
+                    </div>
+                </div>
+
+                <h3>Script de gestion du mot de passe</h3>
+                <div class="code-block">
+<span class="command">python3 change_password.py</span>
+
+<span class="comment"># Actions :</span>
+<span class="comment"># 1. Vérification ancien mot de passe</span>
+<span class="comment"># 2. Saisie nouveau mot de passe (min 4 caractères)</span>
+<span class="comment"># 3. Confirmation</span>
+<span class="comment"># 4. Mise à jour automatique</span>
+</div>
+            </div>
+
+            <!-- 7. CORRECTIONS APPLIQUÉES -->
+            <div id="corrections" class="section">
+                <h2>7. Corrections appliquées</h2>
+                
+                <h3>1. WiFi - Clavier virtuel</h3>
+                <div class="config-box">
+                    <div class="success-box">
+                        <strong>Problème résolu :</strong> Le clavier virtuel restait sous la fenêtre de mot de passe WiFi
+                    </div>
+                    <ul style="margin-top: 10px;">
+                        <li>Clavier positionné automatiquement sous la fenêtre</li>
+                        <li>Attribut <code>topmost</code> ajouté</li>
+                        <li>Détection de débordement d'écran (600px max)</li>
+                        <li>Fenêtre mot de passe réduite : 450x180px</li>
+                        <li>Clavier compact : 900x240px</li>
+                    </ul>
+                    <div class="code-block">
+<span class="comment">Fichier :</span> wifi_config_ui.py
+<span class="comment">Taille fenêtre :</span> 450x180 (au lieu de 400x250)
+<span class="comment">Taille clavier :</span> 900x240 (au lieu de 800x300)
+<span class="comment">Position :</span> y = password_dialog.y + height + 5
+                    </div>
+                </div>
+
+                <h3>2. Affichage des photos - Sélection</h3>
+                <div class="config-box">
+                    <div class="success-box">
+                        <strong>Problème résolu :</strong> Les photos étaient coupées dans la fenêtre de sélection
+                    </div>
+                    <ul style="margin-top: 10px;">
+                        <li>Fenêtre agrandie : 1000x700px</li>
+                        <li>Canvas avec scrollbar ajouté</li>
+                        <li>Calcul de taille adaptatif (2 ou 3 colonnes)</li>
+                        <li>Conservation des proportions (aspect ratio)</li>
+                        <li>Images centrées dans leur conteneur</li>
+                    </ul>
+                    <div class="code-block">
+<span class="comment">Script :</span> patch_integration_complete.py
+<span class="comment">Fonction :</span> show_print_selection()
+<span class="comment">Layout :</span> 2 colonnes (≤4 photos) ou 3 colonnes (>4 photos)
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. INTERFACE UTILISATEUR -->
+            <div id="interface" class="section">
+                <h2>8. Interface utilisateur</h2>
+                
+                <h3>Écran principal</h3>
+                <div class="config-box">
+                    <strong>Panneau de contrôle :</strong>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>Choix style</strong> : Bouton violet variable (selon style actif)</li>
+                        <li><strong>Test photo</strong> : Bouton bleu</li>
+                        <li><strong>Prendre 4 photos</strong> : Bouton vert principal</li>
+                        <li><strong>Galerie</strong> : Bouton rouge</li>
+                    </ul>
+                    
+                    <strong style="display: block; margin-top: 15px;">Boutons maintenance :</strong>
+                    <ul style="margin-top: 10px;">
+                        <li>Diagnostic imprimante</li>
+                        <li>Annuler jobs</li>
+                        <li>Reset imprimante</li>
+                    </ul>
+                    
+                    <strong style="display: block; margin-top: 15px;">Boutons réseau :</strong>
+                    <ul style="margin-top: 10px;">
+                        <li>WiFi (configuration)</li>
+                        <li>QR Code (génération)</li>
+                        <li>NextCloud (upload)</li>
+                        <li><strong>Stats</strong> (Analytics - nouveau)</li>
+                    </ul>
+                </div>
+
+                <h3>Fenêtre de sélection photos</h3>
+                <div class="config-box">
+                    <ul>
+                        <li>Affichage optimisé (1000x700px)</li>
+                        <li>Layout adaptatif (2 ou 3 colonnes selon nombre de photos)</li>
+                        <li>Images proportionnelles et centrées</li>
+                        <li>Scrollbar automatique si nécessaire</li>
+                        <li>Actions : Imprimer / QR Code / Tout imprimer</li>
+                    </ul>
+                </div>
+
+                <h3>⌨️ Clavier virtuel</h3>
+                <div class="config-box">
+                    <strong>Disponible dans :</strong>
+                    <ul style="margin-top: 10px;">
+                        <li>Configuration WiFi (mot de passe réseau)</li>
+                        <li>Accès statistiques (mot de passe admin)</li>
+                        <li>Réinitialisation statistiques</li>
+                        <li>Changement de mot de passe</li>
+                    </ul>
+                    
+                    <div style="margin-top: 15px;">
+                        <div class="config-item">
+                            <span class="config-label">Taille</span>
+                            <span class="config-value">900x240 px</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-label">Layout</span>
+                            <span class="config-value">4 lignes × 10 touches</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-label">Position</span>
+                            <span class="config-value">Auto sous fenêtre parente</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-label">Boutons spéciaux</span>
+                            <span class="config-value">ESPACE, Retour, Effacer, Fermer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9. SÉCURITÉ -->
+            <div id="securite" class="section">
+                <h2>9. Sécurité et mots de passe</h2>
+                
+                <h3>Fonctionnalités protégées</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fonctionnalité</th>
+                            <th>Protection</th>
+                            <th>Mot de passe par défaut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Compteur d'impressions</td>
+                            <td>Réinitialisation</td>
+                            <td>admin123</td>
+                        </tr>
+                        <tr>
+                            <td>Statistiques (Analytics)</td>
+                            <td>Affichage + Réinitialisation</td>
+                            <td>admin123</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="warning-box">
+                    <strong>Important :</strong> Les deux fonctionnalités partagent le même mot de passe stocké dans <code>~/.photomaton_print_counter.json</code>
+                </div>
+
+                <h3>Changement du mot de passe</h3>
+                <div class="code-block">
+<span class="command">cd ~/photomaton</span>
+<span class="command">python3 change_password.py</span>
+
+<span class="comment"># Le script vous guidera :</span>
+<span class="comment"># 1. Entrer l'ancien mot de passe</span>
+<span class="comment"># 2. Entrer le nouveau (minimum 4 caractères)</span>
+<span class="comment"># 3. Confirmer le nouveau</span>
+<span class="comment"># 4. Validation automatique</span>
+</div>
+
+                <div class="info-box">
+                    <strong>💡 Recommandation :</strong> Changez le mot de passe par défaut dès la première utilisation pour sécuriser l'accès aux statistiques et au compteur d'impressions.
+                </div>
+            </div>
+
+            <!-- 10. TAILSCALE -->
+            <div id="tailscale" class="section">
+                <h2>10. Accès distant avec Tailscale</h2>
+                
+                <div class="info-box">
+                    <strong>ℹ️ Pourquoi Tailscale ?</strong> Solution VPN gratuite et sécurisée permettant un accès SSH depuis n'importe où sans configuration réseau complexe.
+                </div>
+
+                <h3>📥 Installation</h3>
+                <div class="code-block">
+<span class="command">curl -fsSL https://tailscale.com/install.sh | sh</span>
+</div>
+
+                <h3>🔐 Connexion initiale</h3>
+                <div class="code-block">
+<span class="command">sudo tailscale up</span>
+<span class="comment"># Suivre le lien affiché pour autoriser l'appareil</span>
+</div>
+
+                <h3>🌐 Récupération de l'IP Tailscale</h3>
+                <div class="code-block">
+<span class="command">tailscale ip -4</span>
+<span class="comment"># Exemple de résultat : 100.85.123.45</span>
+</div>
+
+                <h3>🔄 Activation automatique au démarrage</h3>
+                <div class="code-block">
+<span class="command">sudo systemctl enable tailscaled</span>
+<span class="command">sudo systemctl start tailscaled</span>
+</div>
+
+                <h3>💻 Connexion depuis un autre appareil</h3>
+                
+                <div class="step">
+                    <h4>Sur PC/Mac/Linux :</h4>
+                    <div class="code-block">
+<span class="comment"># Installer Tailscale</span>
+<span class="command">curl -fsSL https://tailscale.com/install.sh | sh</span>
+<span class="command">sudo tailscale up</span>
+
+<span class="comment"># Se connecter au RPi</span>
+<span class="command">ssh vincent@100.85.123.45</span>
+</div>
+                </div>
+
+                <div class="step">
+                    <h4>Sur Windows :</h4>
+                    <ol>
+                        <li>Télécharger : <a href="https://tailscale.com/download/windows" target="_blank">https://tailscale.com/download/windows</a></li>
+                        <li>Installer et se connecter avec le même compte</li>
+                        <li>Utiliser PuTTY ou Windows Terminal pour SSH</li>
+                    </ol>
+                </div>
+
+                <div class="step">
+                    <h4>Sur smartphone :</h4>
+                    <ol>
+                        <li>Installer l'app Tailscale (Play Store / App Store)</li>
+                        <li>Se connecter avec le même compte</li>
+                        <li>Installer une app SSH (Termius, JuiceSSH)</li>
+                        <li>Se connecter à l'IP Tailscale du RPi</li>
+                    </ol>
+                </div>
+
+                <h3>📊 Commandes utiles</h3>
+                <div class="code-block">
+<span class="comment"># Voir tous les appareils connectés</span>
+<span class="command">tailscale status</span>
+
+<span class="comment"># Ping un appareil</span>
+<span class="command">tailscale ping photomaton</span>
+
+<span class="comment"># Se déconnecter</span>
+<span class="command">sudo tailscale down</span>
+
+<span class="comment"># Se reconnecter</span>
+<span class="command">sudo tailscale up</span>
+
+<span class="comment"># Voir les logs</span>
+<span class="command">sudo journalctl -u tailscaled</span>
+</div>
+
+                <div class="success-box">
+                    <strong>✅ Avantages :</strong>
+                    <ul style="margin-top: 10px;">
+                        <li>Fonctionne sur 4G, WiFi public, derrière firewall</li>
+                        <li>Pas besoin d'ouvrir de ports sur la box internet</li>
+                        <li>Chiffrement WireGuard sécurisé</li>
+                        <li>IP stable pour le RPi</li>
+                        <li>Gratuit jusqu'à 100 appareils</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <strong>📞 En cas de problème lors d'un événement :</strong>
+                    <ol style="margin-top: 10px;">
+                        <li>Activer Tailscale sur votre téléphone</li>
+                        <li>Ouvrir votre app SSH</li>
+                        <li>Se connecter : <code>ssh vincent@[IP-TAILSCALE]</code></li>
+                        <li>Relancer : <code>sudo systemctl restart photomaton.service</code></li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- 11. SAUVEGARDE -->
+            <div id="sauvegarde" class="section">
+                <h2>11. Sauvegarde et restauration</h2>
+                
+                <h3>Script de sauvegarde carte SD</h3>
+                <div class="info-box">
+                    <strong>💾 Script complet :</strong> backup_sd.sh
+                </div>
+
+                <div class="code-block">
+<span class="command">sudo ./backup_sd.sh</span>
+
+<span class="comment"># Actions automatiques :</span>
+<span class="comment"># 1. Liste les périphériques disponibles</span>
+<span class="comment"># 2. Démonte automatiquement la carte</span>
+<span class="comment"># 3. Crée l'image complète</span>
+<span class="comment"># 4. Propose la compression (gzip)</span>
+<span class="comment"># 5. Affiche les instructions de restauration</span>
+
+<span class="comment"># Destination :</span> ~/RPI_Backups/
+<span class="comment"># Format :</span> rpi_photomaton_YYYYMMDD_HHMMSS.img.gz
+</div>
+
+                <h3>Restauration d'une sauvegarde</h3>
+                <div class="code-block">
+<span class="comment"># Décompresser l'image</span>
+<span class="command">gunzip rpi_photomaton_YYYYMMDD_HHMMSS.img.gz</span>
+
+<span class="comment"># Identifier la carte SD (ex: /dev/sdb)</span>
+<span class="command">lsblk</span>
+
+<span class="comment"># Restaurer l'image</span>
+<span class="command">sudo dd if=rpi_photomaton_YYYYMMDD_HHMMSS.img of=/dev/sdX bs=4M status=progress</span>
+<span class="command">sync</span>
+</div>
+
+                <h3>Fichiers de configuration à sauvegarder</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fichier</th>
+                            <th>Contenu</th>
+                            <th>Emplacement</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Plugins</td>
+                            <td>Configuration plugins</td>
+                            <td><code>~/.photomaton_plugins.json</code></td>
+                        </tr>
+                        <tr>
+                            <td>Compteur</td>
+                            <td>Compteur + mot de passe</td>
+                            <td><code>~/.photomaton_print_counter.json</code></td>
+                        </tr>
+                        <tr>
+                            <td>Analytics</td>
+                            <td>Données statistiques</td>
+                            <td><code>~/.photomaton_analytics.json</code></td>
+                        </tr>
+                        <tr>
+                            <td>WiFi</td>
+                            <td>Marqueur WiFi configuré</td>
+                            <td><code>~/.photomaton_wifi_configured</code></td>
+                        </tr>
+                        <tr>
+                            <td>NextCloud</td>
+                            <td>Credentials cloud</td>
+                            <td><code>~/.photomaton_nextcloud.json</code></td>
+                        </tr>
+                        <tr>
+                            <td>Photos</td>
+                            <td>Toutes les photos prises</td>
+                            <td><code>~/Photos_Photomaton/</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="warning-box">
+                    <strong>⚠️ Recommandation :</strong> Effectuez une sauvegarde complète avant et après chaque événement important.
+                </div>
+            </div>
+
+            <!-- 12. COMMANDES UTILES -->
+            <div id="commandes" class="section">
+                <h2>12. Commandes utiles</h2>
+                
+                <h3>🖥️ Système</h3>
+                <div class="code-block">
+<span class="comment"># Redémarrer</span>
+<span class="command">sudo reboot</span>
+
+<span class="comment"># Éteindre</span>
+<span class="command">sudo shutdown -h now</span>
+
+<span class="comment"># Voir l'utilisation CPU/RAM</span>
+<span class="command">htop</span>
+
+<span class="comment"># Espace disque</span>
+<span class="command">df -h</span>
+
+<span class="comment"># Température CPU</span>
+<span class="command">vcgencmd measure_temp</span>
+</div>
+
+                <h3>🔧 Services</h3>
+                <div class="code-block">
+<span class="comment"># Lister tous les services</span>
+<span class="command">systemctl list-units --type=service</span>
+
+<span class="comment"># Statut d'un service</span>
+<span class="command">sudo systemctl status nom-du-service</span>
+
+<span class="comment"># Redémarrer un service</span>
+<span class="command">sudo systemctl restart nom-du-service</span>
+
+<span class="comment"># Voir les logs en temps réel</span>
+<span class="command">sudo journalctl -u nom-du-service -f</span>
+</div>
+
+                <h3>🌐 Réseau</h3>
+                <div class="code-block">
+<span class="comment"># Voir les IP</span>
+<span class="command">hostname -I</span>
+
+<span class="comment"># Tester la connexion</span>
+<span class="command">ping google.com</span>
+
+<span class="comment"># Voir les ports ouverts</span>
+<span class="command">sudo netstat -tulpn</span>
+
+<span class="comment"># Statut WiFi</span>
+<span class="command">iwconfig</span>
+</div>
+
+                <h3>📸 Photomaton</h3>
+                <div class="code-block">
+<span class="comment"># Relancer le photomaton</span>
+<span class="command">sudo systemctl restart photomaton.service</span>
+
+<span class="comment"># Voir les logs du photomaton</span>
+<span class="command">sudo journalctl -u photomaton.service -f</span>
+
+<span class="comment"># Éditer le script principal</span>
+<span class="command">nano ~/photomaton/photomaton_complet5.py</span>
+
+<span class="comment"># Tester le script manuellement</span>
+<span class="command">cd ~/photomaton</span>
+<span class="command">python3 photomaton_complet5.py</span>
+</div>
+
+                <h3>🖱️ Écran tactile</h3>
+                <div class="code-block">
+<span class="comment"># Voir la résolution actuelle</span>
+<span class="command">DISPLAY=:0 xrandr</span>
+
+<span class="comment"># Lister les périphériques d'entrée</span>
+<span class="command">DISPLAY=:0 xinput list</span>
+
+<span class="comment"># Tester les événements tactiles</span>
+<span class="command">sudo evtest</span>
+</div>
+
+                <h3>🖨️ Imprimante</h3>
+                <div class="code-block">
+<span class="comment"># Statut de l'imprimante</span>
+<span class="command">lpstat -p CP_400</span>
+
+<span class="comment"># Voir la file d'attente</span>
+<span class="command">lpq -a</span>
+
+<span class="comment"># Annuler tous les jobs</span>
+<span class="command">cancel -a</span>
+
+<span class="comment"># Réactiver l'imprimante</span>
+<span class="command">sudo cupsenable CP_400</span>
+<span class="command">sudo cupsaccept CP_400</span>
+
+<span class="comment"># Logs CUPS</span>
+<span class="command">sudo tail -f /var/log/cups/error_log</span>
+</div>
+
+                <h3>📜 Scripts de maintenance</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Script</th>
+                            <th>Commande</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Correction affichage</td>
+                            <td><code>python3 patch_integration_complete.py</code></td>
+                            <td>Corrige l'affichage des photos</td>
+                        </tr>
+                        <tr>
+                            <td>Analytics</td>
+                            <td><code>python3 patch_add_analytics.py</code></td>
+                            <td>Intègre le plugin Analytics</td>
+                        </tr>
+                        <tr>
+                            <td>Mot de passe</td>
+                            <td><code>python3 change_password.py</code></td>
+                            <td>Change le mot de passe admin</td>
+                        </tr>
+                        <tr>
+                            <td>Sauvegarde SD</td>
+                            <td><code>sudo ./backup_sd.sh</code></td>
+                            <td>Sauvegarde complète de la carte</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- RÉCAPITULATIF FINAL -->
+            <div class="section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+                <h2 style="color: white;">🎯 Récapitulatif configuration</h2>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h3 style="color: white; border: none; padding: 0; margin-bottom: 15px;">✅ Fonctionnalités opérationnelles</h3>
+                    <ol style="font-size: 1.1em;">
+                        <li><strong>Écran tactile :</strong> Fonctionne en X11 avec résolution 1024x600</li>
+                        <li><strong>Imprimante :</strong> Canon CP400 avec backend personnalisé (sans erreur papier)</li>
+                        <li><strong>Photomaton :</strong> Lancement automatique via systemd au démarrage</li>
+                        <li><strong>Plugins :</strong> 7 plugins actifs (Camera, Printer, Decorator, WiFi, QR, NextCloud, Analytics)</li>
+                        <li><strong>Interface :</strong> Clavier virtuel dans toutes les saisies protégées</li>
+                        <li><strong>Analytics :</strong> Tracking automatique avec protection par mot de passe</li>
+                        <li><strong>Accès distant :</strong> Tailscale pour SSH depuis n'importe où</li>
+                        <li><strong>Sauvegarde :</strong> Script automatisé pour carte SD complète</li>
+                    </ol>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h3 style="color: white; border: none; padding: 0; margin-bottom: 15px;">⚠️ Points d'attention</h3>
+                    <ul style="font-size: 1.05em;">
+                        <li>Mot de passe par défaut : <strong>admin123</strong> (à changer immédiatement)</li>
+                        <li>Alimentation 3A minimum obligatoire pour la stabilité</li>
+                        <li>Sauvegardes régulières recommandées (avant/après événements)</li>
+                        <li>Vérifier l'espace disque avant les événements importants</li>
+                    </ul>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 8px;">
+                    <h3 style="color: white; border: none; padding: 0; margin-bottom: 15px;">📞 Dépannage rapide en événement</h3>
+                    <ol style="font-size: 1.05em;">
+                        <li>Activer Tailscale sur votre smartphone</li>
+                        <li>Ouvrir votre app SSH (Termius, JuiceSSH)</li>
+                        <li>Se connecter : <code style="background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 3px;">ssh vincent@[IP-TAILSCALE]</code></li>
+                        <li>Commandes de secours :
+                            <ul style="margin-top: 10px;">
+                                <li><code style="background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 3px;">sudo systemctl restart photomaton.service</code></li>
+                                <li><code style="background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 3px;">cancel -a</code> (annuler impressions)</li>
+                                <li><code style="background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 3px;">sudo reboot</code> (redémarrage complet)</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p style="font-size: 1.3em; font-weight: bold;">📸 Photomaton v2.0</p>
+            <p style="margin: 10px 0;">Architecture modulaire à base de plugins</p>
+            <p style="font-size: 0.9em; opacity: 0.8;">Documentation unifiée générée le 7 octobre 2025</p>
+            <p style="margin-top: 15px; font-size: 0.95em;">Conservation recommandée avec les sauvegardes</p>
+        </footer>
+    </div>
+</body>
+</html>

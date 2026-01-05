@@ -1,0 +1,24 @@
+INSTRUCTIONS DE CORRECTION
+================================================================================
+
+Erreur à la ligne 561
+
+Lignes concernées:
+--------------------------------------------------------------------------------
+     556 |             fg='white',
+     557 |             width=16,
+     558 |             command=lambda: [gallery_win.destroy(), self.create_montage_from_selection()]
+     559 |         ).pack(side=tk.RIGHT, padx=10, pady=10)
+     560 |         
+>>>  561 |         tk.Button(
+     562 |             title_frame,
+     563 |             text="Fermer",
+     564 |             font=('Arial', 12, 'bold'),
+     565 |             bg='#e74c3c',
+--------------------------------------------------------------------------------
+
+Actions à faire:
+1. Ouvrir integration_complete.py avec un éditeur
+2. Aller à la ligne 561
+3. Vérifier l'indentation (doit être alignée avec les lignes précédentes)
+4. Vérifier qu'il n'y a pas de parenthèses non fermées avant

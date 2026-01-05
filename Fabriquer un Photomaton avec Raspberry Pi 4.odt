@@ -1,0 +1,653 @@
+ 
+# 📸 Guide Complet : Fabriquer un Photomaton avec Raspberry Pi 4
+
+## Matériel nécessaire
+
+### Composants principaux
+- **Raspberry Pi 4** (2GB minimum, 4GB recommandé)
+- **Nikon D50** (appareil photo numérique)
+- **Écran tactile HDMI Display-C 1024x600** USB touch rev3.1
+- **Imprimante photo** compatible CUPS (ex: Canon Selphy, Epson PictureMate)
+- **Carte microSD** 32GB minimum (Classe 10)
+- **Alimentation Raspberry Pi** 5V 3A USB-C
+- **Câble USB** pour le Nikon D50
+- **Câble USB** pour l'imprimante
+- **Hub USB alimenté** (recommandé pour éviter les problèmes de puissance)
+
+### Matériel optionnel
+- Boîtier/borne personnalisée
+- Bouton arcade lumineux (si vous voulez un déclencheur physique)
+- Enceintes USB pour le son
+- LED RGB pour l'éclairage
+
+---
+
+## 🔧 Étape 1 : Préparation du Raspberry Pi
+
+### 1.1 Installation du système d'exploitation
+
+```bash
+# Téléchargez Raspberry Pi OS (Desktop) depuis le site officiel
+# Utilisez Raspberry Pi Imager pour flasher la carte SD
+
+# Configuration initiale
+sudo raspi-config
+# > Interface Options > VNC : Activé (optionnel)
+# > Display Options > Resolution : 1024x600 si nécessaire
+# > Performance Options > GPU Memory : 256MB
+```
+
+### 1.2 Mise à jour du système
+
+```bash
+sudo apt update
+sudo apt upgrade -y
+sudo reboot
+```
+
+---
+
+## 📷 Étape 2 : Configuration du Nikon D50
+
+### 2.1 Installation de gPhoto2
+
+```bash
+# Installation des outils de contrôle photo
+sudo apt install -y gphoto2 libgphoto2-dev libgphoto2-6
+
+# Vérification de la version
+gphoto2 --version
+```
+
+### 2.2 Configuration USB et permissions
+
+```bash
+# Ajout de l'utilisateur au groupe plugdev
+sudo usermod -a -G plugdev $USER
+
+# Création du fichier de règles udev
+sudo nano /etc/udev/rules.d/90-libgphoto2.rules
+```
+
+Ajoutez cette ligne :
+```
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="04b0", ATTRS{idProduct}=="*", MODE="0660", GROUP="plugdev"
+```
+
+```bash
+# Recharger les règles udev
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+# Redémarrage nécessaire
+sudo reboot
+```
+
+### 2.3 Test de connexion
+
+```bash
+# Connectez le Nikon D50 en USB
+# Allumez l'appareil
+
+# Détection automatique
+gphoto2 --auto-detect
+
+# Test de capture
+gphoto2 --capture-image-and-download
+```
+
+**Astuce** : Si l'appareil n'est pas détecté, débranchez-le, attendez 5 secondes, puis rebranchez-le.
+
+---
+
+## 🖨️ Étape 3 : Configuration de l'imprimante
+
+### 3.1 Installation de CUPS
+
+```bash
+# Installation du système d'impression
+sudo apt install -y cups cups-client
+
+# Ajout de l'utilisateur au groupe lpadmin
+sudo usermod -a -G lpadmin $USER
+
+# Démarrage du service CUPS
+sudo systemctl enable cups
+sudo systemctl start cups
+```
+
+### 3.2 Configuration de l'imprimante via interface web
+
+```bash
+# Accédez à l'interface CUPS depuis le navigateur
+# URL : http://localhost:631
+
+# Ou depuis un autre ordinateur sur le réseau :
+# http://[IP_du_Raspberry]:631
+```
+
+**Via l'interface CUPS :**
+1. Cliquez sur "Administration"
+2. "Add Printer"
+3. Sélectionnez votre imprimante USB
+4. Suivez l'assistant (choisissez le pilote approprié)
+5. Cochez "Share This Printer"
+
+### 3.3 Configuration en ligne de commande
+
+```bash
+# Liste des imprimantes détectées
+lpstat -p -d
+
+# Définir l'imprimante par défaut
+lpoptions -d nom_de_votre_imprimante
+
+# Test d'impression
+lp -d nom_de_votre_imprimante test.jpg
+```
+
+### 3.4 Installation de pilotes spécifiques
+
+```bash
+# Pour Canon Selphy
+sudo apt install -y printer-driver-gutenprint
+
+# Pour Epson
+sudo apt install -y printer-driver-escpr
+
+# Pour HP
+sudo apt install -y hplip
+```
+
+---
+
+## 🖥️ Étape 4 : Configuration de l'écran tactile
+
+### 4.1 Branchement
+
+1. Connectez le câble HDMI à la sortie HDMI0 du Raspberry Pi
+2. Connectez le câble USB pour le tactile
+3. Alimentez l'écran si nécessaire
+
+### 4.2 Calibration tactile
+
+```bash
+# Installation de l'outil de calibration
+sudo apt install -y xinput-calibrator
+
+# Lancement de la calibration
+DISPLAY=:0 xinput_calibrator
+```
+
+Suivez les instructions à l'écran (touchez les croix).
+
+### 4.3 Sauvegarde de la calibration
+
+```bash
+# Les résultats s'affichent dans le terminal
+# Copiez la section "Section InputClass"
+sudo nano /etc/X11/xorg.conf.d/99-calibration.conf
+```
+
+Collez le contenu obtenu, exemple :
+```
+Section "InputClass"
+    Identifier "calibration"
+    MatchProduct "eGalax Inc. USB TouchController"
+    Option "Calibration" "3996 122 208 3996"
+    Option "SwapAxes" "0"
+EndSection
+```
+
+---
+
+## 🐍 Étape 5 : Installation de l'application Python
+
+### 5.1 Installation des dépendances
+
+```bash
+# Bibliothèques Python
+sudo apt install -y python3-pip python3-tk python3-pil python3-pil.imagetk
+
+# Installation de Pillow (si pas déjà installé)
+pip3 install Pillow
+
+# Pour l'impression depuis Python
+pip3 install pycups
+```
+
+### 5.2 Téléchargement du script
+
+```bash
+# Créez un dossier pour le projet
+mkdir ~/photomaton
+cd ~/photomaton
+
+# Créez le fichier principal
+nano photomaton.py
+```
+
+Copiez le code Python fourni précédemment et ajoutez le module d'impression.
+
+### 5.3 Script d'impression amélioré
+
+Créez un nouveau fichier pour gérer l'impression :
+
+```bash
+nano printer_manager.py
+```
+
+```python
+import cups
+import subprocess
+from pathlib import Path
+
+class PrinterManager:
+    def __init__(self):
+        self.conn = cups.Connection()
+        self.printers = self.conn.getPrinters()
+        self.default_printer = self.get_default_printer()
+    
+    def get_default_printer(self):
+        """Récupère l'imprimante par défaut"""
+        printers = self.conn.getPrinters()
+        for name, info in printers.items():
+            if info.get('printer-is-default', False):
+                return name
+        return list(printers.keys())[0] if printers else None
+    
+    def list_printers(self):
+        """Liste toutes les imprimantes"""
+        return list(self.printers.keys())
+    
+    def print_image(self, image_path, copies=1, printer_name=None):
+        """Imprime une image"""
+        if not printer_name:
+            printer_name = self.default_printer
+        
+        if not printer_name:
+            raise Exception("Aucune imprimante disponible")
+        
+        try:
+            # Options d'impression
+            options = {
+                'copies': str(copies),
+                'media': 'photo',  # Format photo
+                'fit-to-page': 'True',
+                'scaling': '100'
+            }
+            
+            # Envoi de l'impression
+            job_id = self.conn.printFile(
+                printer_name,
+                str(image_path),
+                "Photomaton",
+                options
+            )
+            
+            return job_id
+            
+        except Exception as e:
+            print(f"Erreur impression: {e}")
+            return None
+    
+    def get_printer_status(self, printer_name=None):
+        """Vérifie le statut de l'imprimante"""
+        if not printer_name:
+            printer_name = self.default_printer
+        
+        try:
+            attrs = self.conn.getPrinterAttributes(printer_name)
+            state = attrs.get('printer-state', 0)
+            
+            states = {
+                3: "Inactive",
+                4: "En cours d'impression",
+                5: "Arrêtée"
+            }
+            
+            return states.get(state, "Inconnue")
+        except:
+            return "Non disponible"
+```
+
+---
+
+## 🎨 Étape 6 : Script Python complet avec impression
+
+```bash
+nano photomaton_complet.py
+```
+
+Le script complet intègre :
+- Interface tactile Tkinter
+- Contrôle du Nikon D50
+- Gestion d'impression
+- Planche contact 4 photos
+- Galerie
+- Aperçu avant impression
+
+---
+
+## 🏗️ Étape 7 : Construction de la borne physique
+
+### 7.1 Matériaux pour le boîtier
+
+**Option économique :**
+- Contreplaqué 10mm
+- Pieds en caoutchouc
+- Peinture ou vinyle adhésif
+
+**Option premium :**
+- MDF 12mm
+- Plexiglass pour la façade
+- LED RGB pour l'éclairage
+
+### 7.2 Dimensions recommandées
+
+```
+Hauteur : 150 cm (à ajuster selon votre taille)
+Largeur : 60 cm
+Profondeur : 40 cm
+
+Compartiments :
+- Écran tactile : partie haute centrale
+- Caméra D50 : 20cm au-dessus de l'écran
+- Imprimante : partie basse
+- Raspberry Pi : partie arrière
+- Tiroir sortie photos : partie basse façade
+```
+
+### 7.3 Câblage interne
+
+```
+Raspberry Pi 4
+├── HDMI → Écran tactile
+├── USB 1 → Écran tactile (touch)
+├── USB 2 → Nikon D50
+├── USB 3 → Hub USB alimenté
+│   ├── Imprimante
+│   └── Bouton arcade (optionnel)
+└── Alimentation 5V 3A
+```
+
+**Conseil** : Utilisez des serre-câbles et du velcro pour organiser les câbles.
+
+---
+
+## 🚀 Étape 8 : Lancement automatique au démarrage
+
+### 8.1 Création d'un service systemd
+
+```bash
+sudo nano /etc/systemd/system/photomaton.service
+```
+
+Contenu du fichier :
+```ini
+[Unit]
+Description=Photomaton Application
+After=graphical.target
+
+[Service]
+Type=simple
+User=pi
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/pi/.Xauthority
+WorkingDirectory=/home/pi/photomaton
+ExecStart=/usr/bin/python3 /home/pi/photomaton/photomaton_complet.py
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=graphical.target
+```
+
+```bash
+# Activation du service
+sudo systemctl daemon-reload
+sudo systemctl enable photomaton.service
+sudo systemctl start photomaton.service
+
+# Vérification du statut
+sudo systemctl status photomaton.service
+```
+
+### 8.2 Alternative : lancement via autostart
+
+```bash
+mkdir -p ~/.config/autostart
+nano ~/.config/autostart/photomaton.desktop
+```
+
+Contenu :
+```ini
+[Desktop Entry]
+Type=Application
+Name=Photomaton
+Exec=python3 /home/pi/photomaton/photomaton_complet.py
+Terminal=false
+```
+
+---
+
+## 🔧 Étape 9 : Optimisations et réglages
+
+### 9.1 Désactiver l'écran de veille
+
+```bash
+sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
+```
+
+Ajoutez :
+```
+@xset s off
+@xset -dpms
+@xset s noblank
+```
+
+### 9.2 Masquer le curseur de souris
+
+```bash
+sudo apt install -y unclutter
+nano ~/.config/autostart/unclutter.desktop
+```
+
+```ini
+[Desktop Entry]
+Type=Application
+Name=Unclutter
+Exec=unclutter -idle 0.1 -root
+```
+
+### 9.3 Performance du Raspberry Pi
+
+```bash
+sudo nano /boot/config.txt
+```
+
+Ajoutez :
+```
+# GPU
+gpu_mem=256
+
+# Overclock léger (optionnel)
+over_voltage=2
+arm_freq=1750
+```
+
+---
+
+## 🧪 Étape 10 : Tests et dépannage
+
+### 10.1 Checklist de test
+
+- [ ] L'écran tactile répond correctement
+- [ ] Le Nikon D50 est détecté par gPhoto2
+- [ ] Les photos sont capturées et sauvegardées
+- [ ] L'imprimante est détectée et imprime
+- [ ] L'application démarre automatiquement
+- [ ] Le compte à rebours fonctionne
+- [ ] La planche contact est générée
+
+### 10.2 Problèmes courants
+
+**L'appareil photo n'est pas détecté :**
+```bash
+# Tuer les processus qui bloquent gPhoto2
+killall gvfsd-gphoto2
+sudo systemctl stop gvfs-gphoto2-volume-monitor
+
+# Désactiver définitivement
+sudo chmod -x /usr/lib/gvfs/gvfs-gphoto2-volume-monitor
+```
+
+**L'imprimante ne répond pas :**
+```bash
+# Vérifier CUPS
+sudo systemctl status cups
+
+# Voir la file d'attente
+lpstat -o
+
+# Annuler tous les jobs
+cancel -a
+```
+
+**Écran tactile inversé :**
+```bash
+# Modifier la calibration
+sudo nano /etc/X11/xorg.conf.d/99-calibration.conf
+# Changez SwapAxes de 0 à 1
+```
+
+---
+
+## 📊 Étape 11 : Statistiques et maintenance
+
+### 11.1 Logs de l'application
+
+```bash
+# Voir les logs en temps réel
+journalctl -u photomaton.service -f
+
+# Logs complets
+journalctl -u photomaton.service
+```
+
+### 11.2 Compteur de photos
+
+Ajoutez cette fonction au script Python :
+```python
+def get_stats(self):
+    """Compte le nombre de photos prises"""
+    photos = list(self.photo_dir.glob("photo_*.jpg"))
+    planches = list(self.photo_dir.glob("planche_*.jpg"))
+    return len(photos), len(planches)
+```
+
+### 11.3 Sauvegarde automatique
+
+```bash
+# Script de backup quotidien
+nano ~/backup_photos.sh
+```
+
+```bash
+#!/bin/bash
+DATE=$(date +%Y%m%d)
+rsync -av ~/Photos_Photomaton/ /media/usb/backup_$DATE/
+```
+
+```bash
+chmod +x ~/backup_photos.sh
+
+# Ajouter au crontab (tous les jours à 23h)
+crontab -e
+# Ajoutez :
+0 23 * * * /home/pi/backup_photos.sh
+```
+
+---
+
+## 🎉 Étape 12 : Personnalisation
+
+### 12.1 Thème personnalisé
+
+Modifiez les couleurs dans le script Python :
+```python
+# Palette de couleurs
+COLORS = {
+    'bg': '#1a1a2e',        # Fond principal
+    'primary': '#00d4ff',    # Bouton principal
+    'secondary': '#e94560',  # Bouton secondaire
+    'text': '#ffffff'        # Texte
+}
+```
+
+### 12.2 Logo et branding
+
+```python
+# Ajoutez votre logo
+logo = Image.open('logo.png')
+logo_tk = ImageTk.PhotoImage(logo)
+logo_label = tk.Label(frame, image=logo_tk)
+logo_label.pack()
+```
+
+### 12.3 Effets sonores
+
+```bash
+sudo apt install -y sox
+
+# Dans le script Python
+import os
+os.system('play click.wav')  # Au déclenchement
+os.system('play flash.wav')  # À la prise de photo
+```
+
+---
+
+## 📚 Ressources supplémentaires
+
+### Documentation
+- [gPhoto2 Documentation](http://gphoto.org/doc/)
+- [CUPS Documentation](https://www.cups.org/documentation.html)
+- [Raspberry Pi GPIO](https://pinout.xyz/)
+
+### Communauté
+- Forum Raspberry Pi : raspberrypi.org/forums
+- Reddit : r/raspberry_pi
+
+### Pièces détachées
+- Papier photo 10x15cm compatible
+- Cartouches d'encre/rubans pour imprimante
+- Câbles USB de rechange
+
+---
+
+## ✅ Résultat final
+
+Vous avez maintenant un photomaton professionnel avec :
+- ✅ Interface tactile intuitive 1024x600
+- ✅ Appareil photo Nikon D50 contrôlé
+- ✅ Impression automatique des planches 4 photos
+- ✅ Galerie intégrée
+- ✅ Démarrage automatique
+- ✅ Système stable et fiable
+
+**Coût total estimé : 400-600€** (selon le matériel déjà possédé)
+
+---
+
+## 🔄 Mises à jour futures possibles
+
+- QR code pour télécharger les photos
+- Filtres et effets en temps réel
+- Envoi par email automatique
+- Partage sur réseaux sociaux
+- Reconnaissance faciale
+- Mode GIF animé
+- Écran de veille avec diaporama
+
+**Bon montage ! 🎉**
