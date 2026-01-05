@@ -365,23 +365,6 @@ git push origin feature/ma-fonctionnalite
 - Messages de commit descriptifs
 
 ---
-
-## 📄 Licence
-
-Ce projet est sous licence **Creative Commons** - voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
-[![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
-
-Vous êtes libre de :
-- **Partager** : copier et redistribuer le matériel
-- **Adapter** : remixer, transformer et créer à partir du matériel
-
-Selon les conditions suivantes :
-- **Attribution** : vous devez créditer l'œuvre
-- **Partage dans les mêmes conditions** : sous la même licence
-
----
-
 ## 🙏 Remerciements
 
 - **Raspberry Pi Foundation** pour le matériel
